@@ -1,4 +1,8 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/w2grsvnercr66p95/branch/main?svg=true)](https://ci.appveyor.com/project/mehmetakbulut/signalr-strong/branch/main)
+[![Build status](https://ci.appveyor.com/api/projects/status/w2grsvnercr66p95/branch/master?svg=true)](https://ci.appveyor.com/project/mehmetakbulut/signalr-strong/branch/master)
+[![Coverage Status](https://coveralls.io/repos/github/mehmetakbulut/SignalR.Strong/badge.svg?branch=master)](https://coveralls.io/github/mehmetakbulut/SignalR.Strong?branch=master)
+
+_**Work in progress, API may change**_
+
 # SignalR.Strong
 
 [SignalR Core](https://docs.microsoft.com/en-us/aspnet/core/signalr/introduction?view=aspnetcore-3.1) hubs can define strongly-typed hub methods and also perform strongly-typed server-to-client RPC however clients can neither define strongly-typed client methods nor perform strongly-typed client-to-server RPC.
