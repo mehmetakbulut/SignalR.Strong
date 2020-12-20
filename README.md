@@ -192,10 +192,12 @@ This can be accomplished by a common library so both the server and client use t
 Proxy objects provided by [Castle DynamicProxy](https://www.castleproject.org/projects/dynamicproxy/) are leveraged to provide the API surface of the target hub in a strongly-typed manner.
 This also allows interception of method invocations so the underlying `SignalR.Client.HubConnection` can have its `SendAsync(..)`, `InvokeAsync(..)` and `StreamAsChannelAsync(..)` methods invoked as appropriate with proper transformation.
 
-Reflection is heavily used though there is no `Reflection.Emit` so should be fine on platforms that don't support `Reflection.Emit`.
-Benchmarks show that overhead from reflection pales in comparison to network latency so it is not a problem. Performance can be further improved by caching interception behavior.  
+Reflection is heavily used though benchmarks show that overhead from reflection pales in comparison to network latency.
+Performance can be further improved by caching interception behavior.
 
 ### Limitations
+
+- Due to use of `Reflection.Emit` in Castle DynamicProxy, AOT platforms aren't supported.
 
 - Streams using `IAsyncEnumerable<T>` are currently unsupported. Try streams using `Channel.Reader<T>` instead.
 
