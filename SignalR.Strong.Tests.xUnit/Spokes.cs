@@ -20,14 +20,7 @@ namespace SignalR.Strong.Tests.xUnit
             this.fixture = fixture;
         }
         
-        private interface IMockSpoke
-        {
-            void ReceiveSyncCallback();
-
-            Task ReceiveAsyncCallback();
-        }
-        
-        private class MockSpoke : Spoke<IMockSpoke>, IMockSpoke
+        private class MockSpoke
         {
             public void ReceiveSyncCallback()
             {
@@ -55,7 +48,7 @@ namespace SignalR.Strong.Tests.xUnit
             client.RegisterHub<IMockHub>(conn);
             client.RegisterSpoke<MockSpoke, IMockHub>();
             await client.ConnectToHubsAsync();
-            client.Build();
+            client.BuildSpokes();
 
             var spoke = client.GetSpoke<MockSpoke>();
 
@@ -80,12 +73,8 @@ namespace SignalR.Strong.Tests.xUnit
         {
             
         }
-        
-        private interface IDependentSpoke
-        {
-        }
-        
-        private class DependentSpoke : Spoke<IDependentSpoke>, IDependentSpoke
+
+        private class DependentSpoke
         {
             public IDependency Dependency { get; private set; }
             
@@ -107,7 +96,7 @@ namespace SignalR.Strong.Tests.xUnit
             var client = new StrongClient(provider);
             client.RegisterHub<IMockHub>(conn);
             client.RegisterSpoke<DependentSpoke, IMockHub>();
-            client.Build();
+            client.BuildSpokes();
 
             var spoke = client.GetSpoke<DependentSpoke>();
             spoke.Dependency.Should().NotBeNull();
