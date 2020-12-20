@@ -93,8 +93,19 @@ namespace SignalR.Strong
 
         public TSpoke GetSpoke<TSpoke>()
         {
-            if(!IsBuilt) throw new AccessViolationException("Client must first be built!");
-            return (TSpoke)_spokes[typeof(TSpoke)];
+            throwIfNotBuilt();
+            return (TSpoke) this.GetSpoke(typeof(TSpoke));
+        }
+        
+        public object GetSpoke(Type spokeType)
+        {
+            throwIfNotBuilt();
+            return _spokes[spokeType];
+        }
+
+        private void throwIfNotBuilt()
+        {
+            if (!IsBuilt) throw new AccessViolationException("Client must first be built!");
         }
 
         public async Task<StrongClient> ConnectToHubsAsync()

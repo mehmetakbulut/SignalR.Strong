@@ -73,7 +73,7 @@ namespace SignalR.Strong.Tests.xUnit
         {
             
         }
-
+        
         private class DependentSpoke
         {
             public IDependency Dependency { get; private set; }
@@ -81,6 +81,10 @@ namespace SignalR.Strong.Tests.xUnit
             public DependentSpoke(IDependency dependency)
             {
                 this.Dependency = dependency;
+            }
+
+            public void SomeMethod()
+            {
             }
         }
 
@@ -101,6 +105,41 @@ namespace SignalR.Strong.Tests.xUnit
             var spoke = client.GetSpoke<DependentSpoke>();
             spoke.Dependency.Should().NotBeNull();
             spoke.Dependency.Should().BeSameAs(provider.GetRequiredService<IDependency>());
+        }
+
+        private interface ISpokeInterface
+        {
+            void DoSomething();
+        }
+
+        private class SpokeImplementation : ISpokeInterface
+        {
+            public void DoSomething()
+            {
+                
+            }
+        }
+
+        [Fact]
+        public void RegisterAndGetSpoke()
+        {
+            var client = new StrongClient();
+            client.RegisterHub<IMockHub>(new HubConnectionBuilder().WithUrl("http://localhost/").Build());
+            client.RegisterSpoke<ISpokeInterface, SpokeImplementation, IMockHub>();
+            client.BuildSpokes();
+            var spoke = client.GetSpoke<ISpokeInterface>();
+            
+            client = new StrongClient();
+            client.RegisterHub<IMockHub>(new HubConnectionBuilder().WithUrl("http://localhost/").Build());
+            client.RegisterSpoke<SpokeImplementation, IMockHub>();
+            client.BuildSpokes();
+            spoke = client.GetSpoke<SpokeImplementation>();
+            
+            client = new StrongClient();
+            client.RegisterHub<IMockHub>(new HubConnectionBuilder().WithUrl("http://localhost/").Build());
+            client.RegisterSpoke<ISpokeInterface, SpokeImplementation, IMockHub>((SpokeImplementation)spoke);
+            client.BuildSpokes();
+            spoke = (ISpokeInterface) client.GetSpoke(typeof(ISpokeInterface));
         }
     }
 }
