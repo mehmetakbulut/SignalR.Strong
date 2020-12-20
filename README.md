@@ -66,6 +66,31 @@ Job=LongRun  IterationCount=100  LaunchCount=3  WarmupCount=15
 
 ### Usage
 
+#### Setup
+
+1. Create a client: `var client = new SignalR.Strong.StrongClient()`
+2. Register hubs: `client.RegisterHub<IMyHub>(hubConnection)`
+3. Register spokes which are handlers for server-to-client calls:
+```c#
+client.RegisterSpoke<MySpoke, IMyHub>();             // Simplest form, type will be MySpoke
+client.RegisterSpoke<IMySpoke, MySpoke, IMyHub>();   // Constrain handler interface, type will be IMySpoke
+client.RegisterSpoke<IMySpoke, IMyHub>(new MyHub()); // Pass instance manually, type will be IMySpoke
+```
+4. Connect hubs that haven't been yet: `await client.ConnectToHubsAsync()`
+5. Build spokes: `client.BuildSpokes()` (only needed if you have registered spokes)
+
+#### Interaction
+
+- `THub StrongClient.GetHub<THub>()` returns a hub proxy that you can use for performing strongly-typed calls as well as streaming.
+
+- `HubConnection StrongClient.GetHubConnection<THub>()` returns underlying hub connection for performing low-level operations such as registering for events. (e.g. `Reconnecting`)
+
+- `TSpoke StrongClient.GetSpoke<TSpoke>()` can be used to inspect and edit a spoke though might need to cast it to a concrete type if `TSpoke` is an interface defining only the callback surface.
+
+- Overloads of above methods exists for calling non-generically with a `System.Type` instance if needed.
+
+#### Examples
+
 ###### Calls from client to server
 
 ```c#
@@ -78,11 +103,10 @@ var conn = new SignalR.Client.HubConnection()
     .WithUrl("http://localhost:53353/MyHub")
     .Build();
 
-var client = SignalR.Strong.StrongClient();
+var client = new SignalR.Strong.StrongClient();
 await client
     .RegisterHub<IMyHub>(conn)
     .ConnectToHubsAsync();
-client.Build();
 
 var myHub = client.GetHub<IMyHub>();
 var response = await myHub.DoSomethingOnServer(new List<double>() { 0.4, 0.2 });
@@ -100,7 +124,7 @@ public interface IMySpoke
     void DoSomethingOnClient();
 }
 
-public class MySpoke : SignalR.Strong.Spoke<IMySpoke>, IMySpoke
+public class MySpoke : IMySpoke
 {
     public bool HasServerCalled = { get; private set; }
     
@@ -114,16 +138,16 @@ var conn = new SignalR.Client.HubConnection()
     .WithUrl("http://localhost:53353/MyHub")
     .Build();
 
-var client = SignalR.Strong.StrongClient();
+var client = new SignalR.Strong.StrongClient();
 await client
     .RegisterHub<IMyHub>(conn)
-    .RegisterSpoke<MySpoke, IMyHub>()
+    .RegisterSpoke<IMySpoke, IMyHub>(new MySpoke())
     .ConnectToHubsAsync();
-client.Build();
+client.BuildSpokes();
 
 /* Some time after server calls `DoSomethingOnClient` */
 
-var mySpoke = client.GetSpoke<MySpoke>();
+var mySpoke = client.GetSpoke<IMySpoke>();
 Console.WriteLine(mySpoke.HasServerCalled);
 ```
 
@@ -140,7 +164,7 @@ var conn = new SignalR.Client.HubConnection()
     .WithUrl("http://localhost:53353/MyHub")
     .Build();
 
-var client = SignalR.Strong.StrongClient();
+var client = new SignalR.Strong.StrongClient();
 await client
     .RegisterHub<IMyHub>(conn)
     .ConnectToHubsAsync();
