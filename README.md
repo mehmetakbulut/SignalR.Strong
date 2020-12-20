@@ -1,7 +1,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/w2grsvnercr66p95/branch/master?svg=true)](https://ci.appveyor.com/project/mehmetakbulut/signalr-strong/branch/master)
 [![Coverage Status](https://coveralls.io/repos/github/mehmetakbulut/SignalR.Strong/badge.svg?branch=master)](https://coveralls.io/github/mehmetakbulut/SignalR.Strong?branch=master)
-![Nuget](https://img.shields.io/nuget/v/SignalR.Strong)
-![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/SignalR.Strong)
+[![Nuget](https://img.shields.io/nuget/v/SignalR.Strong)](https://www.nuget.org/packages/SignalR.Strong/)
+[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/SignalR.Strong)](https://www.nuget.org/packages/SignalR.Strong/)
 
 _**Work in progress, API may change**_
 
