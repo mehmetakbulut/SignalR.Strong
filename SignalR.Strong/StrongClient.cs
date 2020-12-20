@@ -43,7 +43,7 @@ namespace SignalR.Strong
         public StrongClient RegisterSpoke<TSpokeIntf, TSpokeImpl, THub>()
             where TSpokeImpl : TSpokeIntf
         {
-            if(IsBuilt) throw new AccessViolationException("Can not map spokes after the client has been built");
+            throwIfBuilt(true);
             _spokeToHubMapping.Add(typeof(TSpokeIntf), typeof(THub));
             _spokeToImplMapping.Add(typeof(TSpokeIntf), typeof(TSpokeImpl));
             _spokeToHandlerRegistrationsMapping.Add(typeof(TSpokeIntf), new List<IDisposable>());
@@ -53,17 +53,14 @@ namespace SignalR.Strong
         public StrongClient RegisterSpoke<TSpokeIntf, TSpokeImpl, THub>(TSpokeImpl spoke)
             where TSpokeImpl : TSpokeIntf
         {
-            if(IsBuilt) throw new AccessViolationException("Can not map spokes after the client has been built");
-            _spokeToHubMapping.Add(typeof(TSpokeIntf), typeof(THub));
-            _spokeToImplMapping.Add(typeof(TSpokeIntf), typeof(TSpokeImpl));
-            _spokeToHandlerRegistrationsMapping.Add(typeof(TSpokeIntf), new List<IDisposable>());
+            this.RegisterSpoke<TSpokeIntf, TSpokeImpl, THub>();
             _spokes.Add(typeof(TSpokeIntf), spoke);
             return this;
         }
 
         public StrongClient RegisterHub<THub>(HubConnection hubConnection) where THub : class
         {
-            if (IsBuilt) throw new AccessViolationException("Can not map spokes after the client has been built");
+            throwIfBuilt(true);
             var hubInterceptor = new HubInterceptor(hubConnection);
             var hubProxy = _proxyGenerator.CreateInterfaceProxyWithoutTarget<THub>(hubInterceptor.ToInterceptor()); 
             _hubConnections[typeof(THub)] = hubConnection;
@@ -93,19 +90,19 @@ namespace SignalR.Strong
 
         public TSpoke GetSpoke<TSpoke>()
         {
-            throwIfNotBuilt();
+            throwIfBuilt(false);
             return (TSpoke) this.GetSpoke(typeof(TSpoke));
         }
         
         public object GetSpoke(Type spokeType)
         {
-            throwIfNotBuilt();
+            throwIfBuilt(false);
             return _spokes[spokeType];
         }
 
-        private void throwIfNotBuilt()
+        private void throwIfBuilt(bool shouldBeBuilt = true)
         {
-            if (!IsBuilt) throw new AccessViolationException("Client must first be built!");
+            if (IsBuilt == shouldBeBuilt) throw new AccessViolationException("Client must first be built!");
         }
 
         public async Task<StrongClient> ConnectToHubsAsync()
