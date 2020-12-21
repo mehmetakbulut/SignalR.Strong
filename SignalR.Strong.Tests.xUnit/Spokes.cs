@@ -20,14 +20,7 @@ namespace SignalR.Strong.Tests.xUnit
             this.fixture = fixture;
         }
         
-        private interface IMockSpoke
-        {
-            void ReceiveSyncCallback();
-
-            Task ReceiveAsyncCallback();
-        }
-        
-        private class MockSpoke : Spoke<IMockSpoke>, IMockSpoke
+        private class MockSpoke
         {
             public void ReceiveSyncCallback()
             {
@@ -55,7 +48,7 @@ namespace SignalR.Strong.Tests.xUnit
             client.RegisterHub<IMockHub>(conn);
             client.RegisterSpoke<MockSpoke, IMockHub>();
             await client.ConnectToHubsAsync();
-            client.Build();
+            client.BuildSpokes();
 
             var spoke = client.GetSpoke<MockSpoke>();
 
@@ -81,17 +74,17 @@ namespace SignalR.Strong.Tests.xUnit
             
         }
         
-        private interface IDependentSpoke
-        {
-        }
-        
-        private class DependentSpoke : Spoke<IDependentSpoke>, IDependentSpoke
+        private class DependentSpoke
         {
             public IDependency Dependency { get; private set; }
             
             public DependentSpoke(IDependency dependency)
             {
                 this.Dependency = dependency;
+            }
+
+            public void SomeMethod()
+            {
             }
         }
 
@@ -107,11 +100,46 @@ namespace SignalR.Strong.Tests.xUnit
             var client = new StrongClient(provider);
             client.RegisterHub<IMockHub>(conn);
             client.RegisterSpoke<DependentSpoke, IMockHub>();
-            client.Build();
+            client.BuildSpokes();
 
             var spoke = client.GetSpoke<DependentSpoke>();
             spoke.Dependency.Should().NotBeNull();
             spoke.Dependency.Should().BeSameAs(provider.GetRequiredService<IDependency>());
+        }
+
+        private interface ISpokeInterface
+        {
+            void DoSomething();
+        }
+
+        private class SpokeImplementation : ISpokeInterface
+        {
+            public void DoSomething()
+            {
+                
+            }
+        }
+
+        [Fact]
+        public void RegisterAndGetSpoke()
+        {
+            var client = new StrongClient();
+            client.RegisterHub<IMockHub>(new HubConnectionBuilder().WithUrl("http://localhost/").Build());
+            client.RegisterSpoke<ISpokeInterface, SpokeImplementation, IMockHub>();
+            client.BuildSpokes();
+            var spoke = client.GetSpoke<ISpokeInterface>();
+            
+            client = new StrongClient();
+            client.RegisterHub<IMockHub>(new HubConnectionBuilder().WithUrl("http://localhost/").Build());
+            client.RegisterSpoke<SpokeImplementation, IMockHub>();
+            client.BuildSpokes();
+            spoke = client.GetSpoke<SpokeImplementation>();
+            
+            client = new StrongClient();
+            client.RegisterHub<IMockHub>(new HubConnectionBuilder().WithUrl("http://localhost/").Build());
+            client.RegisterSpoke<ISpokeInterface, SpokeImplementation, IMockHub>((SpokeImplementation)spoke);
+            client.BuildSpokes();
+            spoke = (ISpokeInterface) client.GetSpoke(typeof(ISpokeInterface));
         }
     }
 }

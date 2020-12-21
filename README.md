@@ -26,7 +26,7 @@ var resp = await hub.DoSomethingOnServer(arg1, arg2, arg3);
 
 - Strongly-typed calls from client to server
 - Strongly-typed handlers for server to client calls
-- Support for client-to-server and server-to-client streams using `Channel.Reader<T>`
+- Support for client-to-server and server-to-client streams using `ChannelReader<T>`
 - No magic strings
 - Small overhead per call and no additional overhead during streaming
 
@@ -49,22 +49,47 @@ AMD Ryzen 7 1700, 1 CPU, 16 logical and 8 physical cores
 
 Job=LongRun  IterationCount=100  LaunchCount=3  WarmupCount=15  
 
-|   Type |                            Method |       Mean |    Error |    StdDev |    Median |  Gen 0 | Gen 1 | Gen 2 | Allocated |
-|------- |---------------------------------- |-----------:|---------:|----------:|----------:|-------:|------:|------:|----------:|
-|    Rpc |                 GetVoid_SendAsync |   3.826 us | 0.016 us |  0.084 us |   3.82 us | 0.0153 |     - |     - |   1.31 KB |
-|    Rpc |               GetVoid_InvokeAsync |  97.114 us | 0.249 us |  1.279 us |  97.14 us |      - |     - |     - |   3.52 KB |
-|    Rpc |                    GetVoid_Strong |  97.684 us | 0.258 us |  1.337 us |  97.77 us |      - |     - |     - |   3.74 KB |
-|    Rpc |          GetValueType_InvokeAsync |  99.393 us | 0.224 us |  1.159 us |  99.40 us |      - |     - |     - |   3.88 KB |
-|    Rpc |               GetValueType_Strong | 101.034 us | 0.242 us |  1.252 us | 101.05 us |      - |     - |     - |   4.16 KB |
-|    Rpc |          SetValueType_InvokeAsync | 105.773 us | 0.297 us |  1.541 us | 105.79 us |      - |     - |     - |   4.15 KB |
-|    Rpc |               SetValueType_Strong | 106.012 us | 0.302 us |  1.556 us | 106.13 us |      - |     - |     - |   4.41 KB |
-| Stream |    GetReader_StreamAsChannelAsync |   33.61 us | 0.147 us |  0.730 us |  33.43 us | 0.1831 |     - |     - |  15.61 KB |
-| Stream |                  GetReader_Strong |   40.11 us | 0.062 us |  0.316 us |  40.08 us | 0.1221 |     - |     - |  16.79 KB |
-| Stream |    SetReader_StreamAsChannelAsync |   22.24 us | 0.108 us |  0.562 us |  22.31 us | 0.0610 |     - |     - |   7.44 KB |
-| Stream |                  SetReader_Strong |   24.87 us | 0.130 us |  0.676 us |  24.90 us | 0.0610 |     - |     - |   7.75 KB |
+|   Type |                            Method |       Mean |     Error |    StdDev |     Median |  Gen 0 |  Gen 1 | Gen 2 | Allocated |
+|------- |---------------------------------- |-----------:|----------:|----------:|-----------:|-------:|-------:|------:|----------:|
+|    Rpc |                 GetVoid_SendAsync |   3.905 us | 0.0265 us | 0.1347 us |   3.894 us | 0.0153 |      - |     - |   1.28 KB |
+|    Rpc |               GetVoid_InvokeAsync |  99.943 us | 0.2659 us | 1.3526 us |  99.992 us |      - |      - |     - |   3.52 KB |
+|    Rpc |                    GetVoid_Strong | 103.363 us | 0.8879 us | 4.4757 us | 102.024 us |      - |      - |     - |   3.74 KB |
+|    Rpc |          GetValueType_InvokeAsync | 107.348 us | 1.1837 us | 5.9989 us | 106.958 us |      - |      - |     - |   3.88 KB |
+|    Rpc |               GetValueType_Strong | 107.014 us | 0.8530 us | 4.2602 us | 106.253 us |      - |      - |     - |   4.16 KB |
+|    Rpc |          SetValueType_InvokeAsync | 106.813 us | 0.6868 us | 3.4495 us | 105.802 us |      - |      - |     - |   4.15 KB |
+|    Rpc |               SetValueType_Strong | 112.837 us | 1.3977 us | 7.1845 us | 111.189 us |      - |      - |     - |   4.41 KB |
+| Stream | GetRxChannel_StreamAsChannelAsync |  35.061 us | 0.4748 us | 2.4536 us |  34.585 us | 0.1831 |      - |     - |  15.66 KB |
+| Stream |               GetRxChannel_Strong |  42.759 us | 0.3332 us | 1.7245 us |  42.419 us | 0.2441 |      - |     - |  16.81 KB |
+| Stream |    SetReader_StreamAsChannelAsync |  23.800 us | 0.2336 us | 1.1861 us |  23.542 us | 0.1221 | 0.0610 |     - |   7.45 KB |
+| Stream |                  SetReader_Strong |  25.580 us | 0.1117 us | 0.5599 us |  25.559 us | 0.0610 |      - |     - |   7.73 KB |
 ```
 
 ### Usage
+
+#### Setup
+
+1. Create a client: `var client = new SignalR.Strong.StrongClient()`
+2. Register hubs: `client.RegisterHub<IMyHub>(hubConnection)`
+3. Register spokes which are handlers for server-to-client calls:
+```c#
+client.RegisterSpoke<MySpoke, IMyHub>();             // Simplest form, type will be MySpoke
+client.RegisterSpoke<IMySpoke, MySpoke, IMyHub>();   // Constrain handler interface, type will be IMySpoke
+client.RegisterSpoke<IMySpoke, IMyHub>(new MyHub()); // Pass instance manually, type will be IMySpoke
+```
+4. Connect hubs that haven't been yet: `await client.ConnectToHubsAsync()`
+5. Build spokes: `client.BuildSpokes()` (only needed if you have registered spokes)
+
+#### Interaction
+
+- `THub StrongClient.GetHub<THub>()` returns a hub proxy that you can use for performing strongly-typed calls as well as streaming.
+
+- `HubConnection StrongClient.GetHubConnection<THub>()` returns underlying hub connection for performing low-level operations such as registering for events. (e.g. `Reconnecting`)
+
+- `TSpoke StrongClient.GetSpoke<TSpoke>()` can be used to inspect and edit a spoke though might need to cast it to a concrete type if `TSpoke` is an interface defining only the callback surface.
+
+- Overloads of above methods exists for calling non-generically with a `System.Type` instance if needed.
+
+#### Examples
 
 ###### Calls from client to server
 
@@ -78,11 +103,10 @@ var conn = new SignalR.Client.HubConnection()
     .WithUrl("http://localhost:53353/MyHub")
     .Build();
 
-var client = SignalR.Strong.StrongClient();
+var client = new SignalR.Strong.StrongClient();
 await client
     .RegisterHub<IMyHub>(conn)
     .ConnectToHubsAsync();
-client.Build();
 
 var myHub = client.GetHub<IMyHub>();
 var response = await myHub.DoSomethingOnServer(new List<double>() { 0.4, 0.2 });
@@ -100,7 +124,7 @@ public interface IMySpoke
     void DoSomethingOnClient();
 }
 
-public class MySpoke : SignalR.Strong.Spoke<IMySpoke>, IMySpoke
+public class MySpoke : IMySpoke
 {
     public bool HasServerCalled = { get; private set; }
     
@@ -114,16 +138,16 @@ var conn = new SignalR.Client.HubConnection()
     .WithUrl("http://localhost:53353/MyHub")
     .Build();
 
-var client = SignalR.Strong.StrongClient();
+var client = new SignalR.Strong.StrongClient();
 await client
     .RegisterHub<IMyHub>(conn)
-    .RegisterSpoke<MySpoke, IMyHub>()
+    .RegisterSpoke<IMySpoke, IMyHub>(new MySpoke())
     .ConnectToHubsAsync();
-client.Build();
+client.BuildSpokes();
 
 /* Some time after server calls `DoSomethingOnClient` */
 
-var mySpoke = client.GetSpoke<MySpoke>();
+var mySpoke = client.GetSpoke<IMySpoke>();
 Console.WriteLine(mySpoke.HasServerCalled);
 ```
 
@@ -132,15 +156,15 @@ Console.WriteLine(mySpoke.HasServerCalled);
 ```c#
 public interface IMyHub
 {
-    Task<Channel.Reader<int>> ServerToClientStream(CancellationToken token);
-    Task ClientToServerStream(Channel.Reader<int> reader);
+    Task<ChannelReader<int>> ServerToClientStream(CancellationToken token);
+    Task ClientToServerStream(ChannelReader<int> reader);
 }
 
 var conn = new SignalR.Client.HubConnection()
     .WithUrl("http://localhost:53353/MyHub")
     .Build();
 
-var client = SignalR.Strong.StrongClient();
+var client = new SignalR.Strong.StrongClient();
 await client
     .RegisterHub<IMyHub>(conn)
     .ConnectToHubsAsync();
@@ -168,14 +192,16 @@ This can be accomplished by a common library so both the server and client use t
 Proxy objects provided by [Castle DynamicProxy](https://www.castleproject.org/projects/dynamicproxy/) are leveraged to provide the API surface of the target hub in a strongly-typed manner.
 This also allows interception of method invocations so the underlying `SignalR.Client.HubConnection` can have its `SendAsync(..)`, `InvokeAsync(..)` and `StreamAsChannelAsync(..)` methods invoked as appropriate with proper transformation.
 
-Reflection is heavily used though there is no `Reflection.Emit` so should be fine on platforms that don't support `Reflection.Emit`.
-Benchmarks show that overhead from reflection pales in comparison to network latency so it is not a problem. Performance can be further improved by caching interception behavior.  
+Reflection is heavily used though benchmarks show that overhead from reflection pales in comparison to network latency.
+Performance can be further improved by caching interception behavior.
 
 ### Limitations
 
-- Streams using `IAsyncEnumerable<T>` are currently unsupported. Try streams using `Channel.Reader<T>` instead.
+- Due to use of `Reflection.Emit` in Castle DynamicProxy, AOT platforms aren't supported.
 
-- Passing multiple `CancellationToken` and/or `Channel.Reader<T>` is undefined behavior.
+- Streams using `IAsyncEnumerable<T>` are currently unsupported. Try streams using `ChannelReader<T>` instead.
+
+- Passing multiple `CancellationToken` and/or `ChannelReader<T>` is undefined behavior.
 
 
 ### Footnote

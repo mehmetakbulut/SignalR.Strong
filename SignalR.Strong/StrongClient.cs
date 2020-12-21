@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using Castle.DynamicProxy;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -16,11 +17,11 @@ namespace SignalR.Strong
         private Dictionary<System.Type, HubConnection> _hubConnections = new Dictionary<Type, HubConnection>();
         private Dictionary<System.Type, object> _hubs = new Dictionary<Type, object>();
         private Dictionary<System.Type, System.Type> _spokeToHubMapping = new Dictionary<Type, Type>();
+        private Dictionary<System.Type, System.Type> _spokeToImplMapping = new Dictionary<Type, Type>();
+        private Dictionary<System.Type, List<IDisposable>> _spokeToHandlerRegistrationsMapping = new Dictionary<Type, List<IDisposable>>();
         private Dictionary<System.Type, object> _spokes = new Dictionary<Type, object>();
 
         public bool IsBuilt { get; private set; }
-        
-        public bool IsConnected { get; private set; }
 
         public StrongClient()
         {
@@ -33,96 +34,142 @@ namespace SignalR.Strong
         }
 
         public StrongClient RegisterSpoke<TSpoke, THub>()
-            where TSpoke : Spoke
         {
-            if(IsBuilt) throw new AccessViolationException("Can not map spokes after the client has been built");
-            _spokeToHubMapping.Add(typeof(TSpoke), typeof(THub));
+            return this.RegisterSpoke<TSpoke, TSpoke, THub>();
+        }
+        
+        public StrongClient RegisterSpoke<TSpokeIntf, TSpokeImpl, THub>()
+            where TSpokeImpl : TSpokeIntf
+        {
+            throwIfBuilt(true);
+            _spokeToHubMapping.Add(typeof(TSpokeIntf), typeof(THub));
+            _spokeToImplMapping.Add(typeof(TSpokeIntf), typeof(TSpokeImpl));
+            _spokeToHandlerRegistrationsMapping.Add(typeof(TSpokeIntf), new List<IDisposable>());
+            return this;
+        }
+
+        public StrongClient RegisterSpoke<TSpokeIntf, TSpokeImpl, THub>(TSpokeImpl spoke)
+            where TSpokeImpl : TSpokeIntf
+        {
+            this.RegisterSpoke<TSpokeIntf, TSpokeImpl, THub>();
+            _spokes.Add(typeof(TSpokeIntf), spoke);
             return this;
         }
 
         public StrongClient RegisterHub<THub>(HubConnection hubConnection) where THub : class
         {
-            if (IsBuilt) throw new AccessViolationException("Can not map spokes after the client has been built");
+            return this.RegisterHub(typeof(THub), hubConnection);
+        }
+        
+        public StrongClient RegisterHub(Type hubType, HubConnection hubConnection)
+        {
+            throwIfBuilt(true);
             var hubInterceptor = new HubInterceptor(hubConnection);
-            var hubProxy = _proxyGenerator.CreateInterfaceProxyWithoutTarget<THub>(hubInterceptor.ToInterceptor());
-            //_services.AddSingleton<THub>(hubProxy);
-            _hubConnections[typeof(THub)] = hubConnection;
-            _hubs[typeof(THub)] = hubProxy;
+            var hubProxy = _proxyGenerator.CreateInterfaceProxyWithoutTarget(hubType, hubInterceptor.ToInterceptor()); 
+            _hubConnections[hubType] = hubConnection;
+            _hubs[hubType] = hubProxy;
             return this;
         }
 
         public THub GetHub<THub>()
         {
-            return (THub)_hubs[typeof(THub)];
+            return (THub)this.GetHub(typeof(THub));
+        }
+        
+        public object GetHub(Type hubType)
+        {
+            return _hubs[hubType];
         }
 
         public HubConnection GetConnection<THub>()
         {
-            return _hubConnections[typeof(THub)];
+            return this.GetConnection(typeof(THub));
+        }
+        
+        public HubConnection GetConnection(Type hubType)
+        {
+            return _hubConnections[hubType];
         }
 
         public TSpoke GetSpoke<TSpoke>()
         {
-            if(!IsBuilt) throw new AccessViolationException("Client must first be built!");
-            return (TSpoke)_spokes[typeof(TSpoke)];
+            throwIfBuilt(false);
+            return (TSpoke) this.GetSpoke(typeof(TSpoke));
+        }
+        
+        public object GetSpoke(Type spokeType)
+        {
+            throwIfBuilt(false);
+            return _spokes[spokeType];
+        }
+
+        private void throwIfBuilt(bool shouldBeBuilt = true)
+        {
+            if (IsBuilt == shouldBeBuilt) throw new AccessViolationException("Client must first be built!");
         }
 
         public async Task<StrongClient> ConnectToHubsAsync()
         {
-            foreach (var connection in _hubConnections.Values)
-            {
-                await connection.StartAsync();
-            }
+            await Task.WhenAll(_hubConnections.Values
+                .Where(conn => conn.State == HubConnectionState.Disconnected)
+                .Select(conn => conn.StartAsync()));
 
-            IsConnected = true;
             return this;
         }
 
-        public StrongClient Build()
+        public StrongClient BuildSpokes()
         {
             IsBuilt = true;
             foreach (var types in _spokeToHubMapping)
             {
-                var spokeType = types.Key;
+                var intfType = types.Key;
+                var implType = this._spokeToImplMapping[intfType];
                 var hubType = types.Value;
-                Spoke spoke;
+                buildSpoke(intfType, implType, hubType);
+            }
+            return this;
+        }
+
+        private void buildSpoke(Type intfType, Type implType, Type hubType)
+        {
+            if (!_spokes.TryGetValue(intfType, out object spoke))
+            {
+                // If spoke doesn't exist, create it
                 if (_provider is null)
                 {
-                    spoke = (Spoke) Activator.CreateInstance(spokeType);
+                    spoke = Activator.CreateInstance(implType);
                 }
                 else
                 {
-                    spoke = (Spoke) ActivatorUtilities.CreateInstance(_provider, spokeType);
+                    // Perform dependency injection if a service provider is given
+                    spoke = ActivatorUtilities.CreateInstance(_provider, implType);
                 }
-                spoke.Connection = _hubConnections[hubType];
-                spoke.Client = this;
-                var selfMethods = spokeType.GetMethods(BindingFlags.Instance | BindingFlags.Public).ToDictionary(info => info.Name);
-                var baseType = spokeType.BaseType;
-                if (baseType == null || baseType.BaseType != typeof(Spoke))
-                {
-                    throw new TypeAccessException("A spoke must inherit Spoke<TSpokeInterface> which inherits from Spoke");
-                }
-                var intfType = baseType.GetGenericArguments()[0];
-                var intfMethods = intfType.GetMethods().ToDictionary(info => info.Name);
-                foreach (var method in intfMethods)
-                {
-                    if (selfMethods.TryGetValue(method.Key, out var x))
-                    {
-                        spoke.Connection.On(method.Key, method.Value.GetParameters().Select(a => a.ParameterType).ToArray(),
-                            objects =>
-                            {
-                                x.Invoke(spoke, objects);
-                                return Task.CompletedTask;
-                            });
-                    }
-                    else
-                    {
-                        throw new MissingMethodException(spokeType.FullName, method.Key);
-                    }
-                }
-                _spokes[spokeType] = spoke;
             }
-            return this;
+            
+            var connection = _hubConnections[hubType];
+            
+            if (typeof(ISpoke).IsAssignableFrom(implType))
+            {
+                // If spoke implements the spoke interface, then set its properties
+                var ispoke = (ISpoke) spoke;
+                ispoke.Connection = connection;
+                ispoke.Client = this;
+                ispoke.WeakHub = this.GetHub(hubType);
+            }
+
+            var methods = intfType.GetMethods(BindingFlags.Instance | BindingFlags.Public);
+            foreach (var method in methods)
+            {
+                var reg = connection.On(method.Name, method.GetParameters().Select(a => a.ParameterType).ToArray(),
+                    objects =>
+                    {
+                        method.Invoke(spoke, objects);
+                        return Task.CompletedTask;
+                    });
+                _spokeToHandlerRegistrationsMapping[intfType].Add(reg);
+            }
+
+            _spokes[intfType] = spoke;
         }
     }
 }

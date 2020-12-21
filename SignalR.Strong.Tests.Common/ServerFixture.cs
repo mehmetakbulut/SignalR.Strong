@@ -59,7 +59,7 @@ namespace SignalR.Strong.Tests.Common
                     .WithUrl(fixture.GetCompleteServerUrl("/mockhub"))
                     .Build();
                 _client = new StrongClient();
-                (await _client.RegisterHub<IMockHub>(conn).ConnectToHubsAsync()).Build();
+                (await _client.RegisterHub<IMockHub>(conn).ConnectToHubsAsync()).BuildSpokes();
             }
 
             return _client;
