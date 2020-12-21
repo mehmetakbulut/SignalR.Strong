@@ -49,19 +49,19 @@ AMD Ryzen 7 1700, 1 CPU, 16 logical and 8 physical cores
 
 Job=LongRun  IterationCount=100  LaunchCount=3  WarmupCount=15  
 
-|   Type |                            Method |       Mean |    Error |    StdDev |    Median |  Gen 0 | Gen 1 | Gen 2 | Allocated |
-|------- |---------------------------------- |-----------:|---------:|----------:|----------:|-------:|------:|------:|----------:|
-|    Rpc |                 GetVoid_SendAsync |   3.826 us | 0.016 us |  0.084 us |   3.82 us | 0.0153 |     - |     - |   1.31 KB |
-|    Rpc |               GetVoid_InvokeAsync |  97.114 us | 0.249 us |  1.279 us |  97.14 us |      - |     - |     - |   3.52 KB |
-|    Rpc |                    GetVoid_Strong |  97.684 us | 0.258 us |  1.337 us |  97.77 us |      - |     - |     - |   3.74 KB |
-|    Rpc |          GetValueType_InvokeAsync |  99.393 us | 0.224 us |  1.159 us |  99.40 us |      - |     - |     - |   3.88 KB |
-|    Rpc |               GetValueType_Strong | 101.034 us | 0.242 us |  1.252 us | 101.05 us |      - |     - |     - |   4.16 KB |
-|    Rpc |          SetValueType_InvokeAsync | 105.773 us | 0.297 us |  1.541 us | 105.79 us |      - |     - |     - |   4.15 KB |
-|    Rpc |               SetValueType_Strong | 106.012 us | 0.302 us |  1.556 us | 106.13 us |      - |     - |     - |   4.41 KB |
-| Stream |    GetReader_StreamAsChannelAsync |   33.61 us | 0.147 us |  0.730 us |  33.43 us | 0.1831 |     - |     - |  15.61 KB |
-| Stream |                  GetReader_Strong |   40.11 us | 0.062 us |  0.316 us |  40.08 us | 0.1221 |     - |     - |  16.79 KB |
-| Stream |    SetReader_StreamAsChannelAsync |   22.24 us | 0.108 us |  0.562 us |  22.31 us | 0.0610 |     - |     - |   7.44 KB |
-| Stream |                  SetReader_Strong |   24.87 us | 0.130 us |  0.676 us |  24.90 us | 0.0610 |     - |     - |   7.75 KB |
+|   Type |                            Method |       Mean |     Error |    StdDev |     Median |  Gen 0 |  Gen 1 | Gen 2 | Allocated |
+|------- |---------------------------------- |-----------:|----------:|----------:|-----------:|-------:|-------:|------:|----------:|
+|    Rpc |                 GetVoid_SendAsync |   3.905 us | 0.0265 us | 0.1347 us |   3.894 us | 0.0153 |      - |     - |   1.28 KB |
+|    Rpc |               GetVoid_InvokeAsync |  99.943 us | 0.2659 us | 1.3526 us |  99.992 us |      - |      - |     - |   3.52 KB |
+|    Rpc |                    GetVoid_Strong | 103.363 us | 0.8879 us | 4.4757 us | 102.024 us |      - |      - |     - |   3.74 KB |
+|    Rpc |          GetValueType_InvokeAsync | 107.348 us | 1.1837 us | 5.9989 us | 106.958 us |      - |      - |     - |   3.88 KB |
+|    Rpc |               GetValueType_Strong | 107.014 us | 0.8530 us | 4.2602 us | 106.253 us |      - |      - |     - |   4.16 KB |
+|    Rpc |          SetValueType_InvokeAsync | 106.813 us | 0.6868 us | 3.4495 us | 105.802 us |      - |      - |     - |   4.15 KB |
+|    Rpc |               SetValueType_Strong | 112.837 us | 1.3977 us | 7.1845 us | 111.189 us |      - |      - |     - |   4.41 KB |
+| Stream | GetRxChannel_StreamAsChannelAsync |  35.061 us | 0.4748 us | 2.4536 us |  34.585 us | 0.1831 |      - |     - |  15.66 KB |
+| Stream |               GetRxChannel_Strong |  42.759 us | 0.3332 us | 1.7245 us |  42.419 us | 0.2441 |      - |     - |  16.81 KB |
+| Stream |    SetReader_StreamAsChannelAsync |  23.800 us | 0.2336 us | 1.1861 us |  23.542 us | 0.1221 | 0.0610 |     - |   7.45 KB |
+| Stream |                  SetReader_Strong |  25.580 us | 0.1117 us | 0.5599 us |  25.559 us | 0.0610 |      - |     - |   7.73 KB |
 ```
 
 ### Usage

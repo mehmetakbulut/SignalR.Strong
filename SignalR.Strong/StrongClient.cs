@@ -22,8 +22,6 @@ namespace SignalR.Strong
         private Dictionary<System.Type, object> _spokes = new Dictionary<Type, object>();
 
         public bool IsBuilt { get; private set; }
-        
-        public bool IsConnected { get; private set; }
 
         public StrongClient()
         {
@@ -60,11 +58,16 @@ namespace SignalR.Strong
 
         public StrongClient RegisterHub<THub>(HubConnection hubConnection) where THub : class
         {
+            return this.RegisterHub(typeof(THub), hubConnection);
+        }
+        
+        public StrongClient RegisterHub(Type hubType, HubConnection hubConnection)
+        {
             throwIfBuilt(true);
             var hubInterceptor = new HubInterceptor(hubConnection);
-            var hubProxy = _proxyGenerator.CreateInterfaceProxyWithoutTarget<THub>(hubInterceptor.ToInterceptor()); 
-            _hubConnections[typeof(THub)] = hubConnection;
-            _hubs[typeof(THub)] = hubProxy;
+            var hubProxy = _proxyGenerator.CreateInterfaceProxyWithoutTarget(hubType, hubInterceptor.ToInterceptor()); 
+            _hubConnections[hubType] = hubConnection;
+            _hubs[hubType] = hubProxy;
             return this;
         }
 
@@ -107,12 +110,10 @@ namespace SignalR.Strong
 
         public async Task<StrongClient> ConnectToHubsAsync()
         {
-            foreach (var connection in _hubConnections.Values)
-            {
-                await connection.StartAsync();
-            }
+            await Task.WhenAll(_hubConnections.Values
+                .Where(conn => conn.State == HubConnectionState.Disconnected)
+                .Select(conn => conn.StartAsync()));
 
-            IsConnected = true;
             return this;
         }
 
