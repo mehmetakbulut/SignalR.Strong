@@ -26,7 +26,7 @@ var resp = await hub.DoSomethingOnServer(arg1, arg2, arg3);
 
 - Strongly-typed calls from client to server
 - Strongly-typed handlers for server to client calls
-- Support for client-to-server and server-to-client streams using `Channel.Reader<T>`
+- Support for client-to-server and server-to-client streams using `ChannelReader<T>`
 - No magic strings
 - Small overhead per call and no additional overhead during streaming
 
@@ -156,8 +156,8 @@ Console.WriteLine(mySpoke.HasServerCalled);
 ```c#
 public interface IMyHub
 {
-    Task<Channel.Reader<int>> ServerToClientStream(CancellationToken token);
-    Task ClientToServerStream(Channel.Reader<int> reader);
+    Task<ChannelReader<int>> ServerToClientStream(CancellationToken token);
+    Task ClientToServerStream(ChannelReader<int> reader);
 }
 
 var conn = new SignalR.Client.HubConnection()
@@ -199,9 +199,9 @@ Performance can be further improved by caching interception behavior.
 
 - Due to use of `Reflection.Emit` in Castle DynamicProxy, AOT platforms aren't supported.
 
-- Streams using `IAsyncEnumerable<T>` are currently unsupported. Try streams using `Channel.Reader<T>` instead.
+- Streams using `IAsyncEnumerable<T>` are currently unsupported. Try streams using `ChannelReader<T>` instead.
 
-- Passing multiple `CancellationToken` and/or `Channel.Reader<T>` is undefined behavior.
+- Passing multiple `CancellationToken` and/or `ChannelReader<T>` is undefined behavior.
 
 
 ### Footnote
