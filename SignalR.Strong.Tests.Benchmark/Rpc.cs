@@ -17,6 +17,7 @@ namespace SignalR.Strong.Tests.Benchmark
         public ServerFixture fixture;
         public StrongClient client;
         public IMockHub hub;
+        public ExpressiveHub<IMockHub> ehub;
         public HubConnection conn;
         private Channel<int> channel;
 
@@ -26,6 +27,7 @@ namespace SignalR.Strong.Tests.Benchmark
             fixture = new ServerFixture();
             client = await fixture.GetClient();
             hub = client.GetHub<IMockHub>();
+            ehub = client.GetExpressiveHub<IMockHub>();
             conn = client.GetConnection<IMockHub>();
             channel = Channel.CreateUnbounded<int>();
         }
@@ -49,6 +51,18 @@ namespace SignalR.Strong.Tests.Benchmark
         }
         
         [Benchmark]
+        public async Task GetVoid_ExprSendAsync()
+        {
+            await ehub.SendAsync(h => h.GetVoid());
+        }
+        
+        [Benchmark]
+        public async Task GetVoid_ExprInvokeAsync()
+        {
+            await ehub.InvokeAsync(h => h.GetVoid());
+        }
+        
+        [Benchmark]
         public async Task GetValueType_InvokeAsync()
         {
             var _ = await conn.InvokeAsync<int>("GetValueType");
@@ -61,6 +75,12 @@ namespace SignalR.Strong.Tests.Benchmark
         }
         
         [Benchmark]
+        public async Task GetValueType_Expr()
+        {
+            var _ = await ehub.InvokeAsync(h => h.GetValueType());
+        }
+
+        [Benchmark]
         public async Task<int> SetValueType_InvokeAsync()
         {
             return await conn.InvokeAsync<int>("SetValueType", 123);
@@ -70,6 +90,12 @@ namespace SignalR.Strong.Tests.Benchmark
         public async Task<int> SetValueType_Strong()
         {
             return await hub.SetValueType(123);
+        }
+        
+        [Benchmark]
+        public async Task<int> SetValueType_Expr()
+        {
+            return await ehub.InvokeAsync(h => h.SetValueType(123));
         }
     }
 }

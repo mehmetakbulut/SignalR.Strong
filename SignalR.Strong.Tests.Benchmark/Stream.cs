@@ -14,6 +14,7 @@ namespace SignalR.Strong.Tests.Benchmark
         public ServerFixture fixture;
         public StrongClient client;
         public IMockHub hub;
+        public ExpressiveHub<IMockHub> ehub;
         public HubConnection conn;
         private Channel<int> channel;
         private CancellationTokenSource cts;
@@ -25,6 +26,7 @@ namespace SignalR.Strong.Tests.Benchmark
             fixture = new ServerFixture();
             client = await fixture.GetClient();
             hub = client.GetHub<IMockHub>();
+            ehub = client.GetExpressiveHub<IMockHub>();
             conn = client.GetConnection<IMockHub>();
         }
         
@@ -53,7 +55,20 @@ namespace SignalR.Strong.Tests.Benchmark
         }
         
         [Benchmark]
-        public async Task SetReader_StreamAsChannelAsync()
+        public async Task GetRxChannel_Expr()
+        {
+            channel = Channel.CreateUnbounded<int>();
+            cts = new CancellationTokenSource();
+            for (int i = 0; i < n; i++)
+            {
+                var _ = await ehub.StreamAsChannelAsync(
+                    h => h.GetRxChannelWithToken(cts.Token));
+            }
+            cts.Cancel();
+        }
+        
+        [Benchmark]
+        public async Task SetReader_SendAsync()
         {
             channel = Channel.CreateUnbounded<int>();
             for (int i = 0; i < n; i++)
@@ -71,6 +86,18 @@ namespace SignalR.Strong.Tests.Benchmark
             for (int i = 0; i < n; i++)
             {
                 await hub.GetTxChannel(channel.Reader);
+            }
+            
+            channel.Writer.TryComplete();
+        }
+        
+        [Benchmark]
+        public async Task SetReader_Expr()
+        {
+            channel = Channel.CreateUnbounded<int>();
+            for (int i = 0; i < n; i++)
+            {
+                await ehub.SendAsync(h => h.GetTxChannel(channel.Reader));
             }
             
             channel.Writer.TryComplete();

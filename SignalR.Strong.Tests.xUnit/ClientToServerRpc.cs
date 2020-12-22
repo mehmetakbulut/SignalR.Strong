@@ -48,5 +48,36 @@ namespace SignalR.Strong.Tests.xUnit
             var col = await hub.SetCollection(new List<int>() {1, 2, 3});
             col.Should().BeEquivalentTo(new List<int>() {1, 2, 3});
         }
+        
+        [Fact]
+        public async Task GetExpr()
+        {
+            var client = await fixture.GetClient();
+            var ehub = client.GetExpressiveHub<IMockHub>();
+
+            await ehub.SendAsync(hub => hub.GetVoid());
+            await ehub.InvokeAsync(hub => hub.GetVoid());
+
+            Assert.Equal(123, await ehub.InvokeAsync(hub => hub.GetValueType()));
+
+            Assert.Equal("abc", await ehub.InvokeAsync(hub => hub.GetReferenceType()));
+
+            var col = await ehub.InvokeAsync(hub => hub.GetCollection());
+            col.Should().BeEquivalentTo(new List<int>() {1, 2, 3});
+        }
+
+        [Fact]
+        public async Task SetExpr()
+        {
+            var client = await fixture.GetClient();
+            var ehub = client.GetExpressiveHub<IMockHub>();
+            
+            Assert.Equal(123, await ehub.InvokeAsync(hub => hub.SetValueType(123)));
+
+            Assert.Equal("abc", await ehub.InvokeAsync(hub => hub.SetReferenceType("abc")));
+
+            var col = await ehub.InvokeAsync(hub => hub.SetCollection(new List<int>() {1, 2, 3}));
+            col.Should().BeEquivalentTo(new List<int>() {1, 2, 3});
+        }
     }
 }
