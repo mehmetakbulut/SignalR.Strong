@@ -10,11 +10,11 @@ using Xunit;
 
 namespace SignalR.Strong.Tests.xUnit
 {
-    public class BasicGetAndSet : IClassFixture<ServerFixture>
+    public class Rpc : IClassFixture<ServerFixture>
     {
         private ServerFixture fixture;
 
-        public BasicGetAndSet(ServerFixture fixture)
+        public Rpc(ServerFixture fixture)
         {
             this.fixture = fixture;
         }
@@ -50,7 +50,7 @@ namespace SignalR.Strong.Tests.xUnit
         }
         
         [Fact]
-        public async Task GetExpr()
+        public async Task GetViaExpr()
         {
             var client = await fixture.GetClient();
             var ehub = client.GetExpressiveHub<IMockHub>();
@@ -67,7 +67,7 @@ namespace SignalR.Strong.Tests.xUnit
         }
 
         [Fact]
-        public async Task SetExpr()
+        public async Task SetViaExpr()
         {
             var client = await fixture.GetClient();
             var ehub = client.GetExpressiveHub<IMockHub>();

@@ -35,13 +35,13 @@ namespace SignalR.Strong.Tests.Benchmark
         [Benchmark]
         public async Task GetVoid_SendAsync()
         {
-            await conn.SendAsync("GetVoid");
+            await conn.SendAsync(nameof(IMockHub.GetVoid));
         }
         
         [Benchmark]
         public async Task GetVoid_InvokeAsync()
         {
-            await conn.InvokeAsync("GetVoid");
+            await conn.InvokeAsync(nameof(IMockHub.GetVoid));
         }
         
         [Benchmark]
@@ -65,7 +65,7 @@ namespace SignalR.Strong.Tests.Benchmark
         [Benchmark]
         public async Task GetValueType_InvokeAsync()
         {
-            var _ = await conn.InvokeAsync<int>("GetValueType");
+            var _ = await conn.InvokeAsync<int>(nameof(IMockHub.GetValueType));
         }
         
         [Benchmark]
@@ -83,7 +83,7 @@ namespace SignalR.Strong.Tests.Benchmark
         [Benchmark]
         public async Task<int> SetValueType_InvokeAsync()
         {
-            return await conn.InvokeAsync<int>("SetValueType", 123);
+            return await conn.InvokeAsync<int>(nameof(IMockHub.SetValueType), 123);
         }
         
         [Benchmark]

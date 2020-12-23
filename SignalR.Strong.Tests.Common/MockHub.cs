@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -24,24 +25,25 @@ namespace SignalR.Strong.Tests.Common
 
         Task<List<int>> SetCollection(List<int> a);
 
-        Task<ChannelReader<int>> StreamToClient(List<int> a);
+        Task<ChannelReader<int>> StreamToClientViaChannel(List<int> a);
         
-        Task<ChannelReader<int>> StreamToClientWithToken(List<int> a, CancellationToken cancellationToken);
+        Task<ChannelReader<int>> StreamToClientViaChannelWithToken(List<int> a, CancellationToken cancellationToken);
 
-        Task StreamFromClient(List<int> a, ChannelReader<int> reader);
+        Task StreamFromClientViaChannel(List<int> a, ChannelReader<int> reader);
         
-        Task<ChannelReader<int>> LoopRx();
+        IAsyncEnumerable<int> StreamToClientViaEnumerableWithToken(
+            List<int> a,
+            [EnumeratorCancellation]
+            CancellationToken cancellationToken);
 
-        Task LoopTx(ChannelReader<int> reader);
+        Task StreamFromClientViaEnumerable(List<int> a, IAsyncEnumerable<int> reader);
 
-        Task<bool> LoopReset();
-        
         Task TriggerSyncCallback();
         
         Task TriggerAsyncCallback();
         Task<ChannelReader<int>> GetRxChannel();
-        Task<ChannelReader<int>> GetRxChannelWithToken(CancellationToken cancellationToken);
-        Task GetTxChannel(ChannelReader<int> reader);
+        Task<ChannelReader<int>> GetChannelWithToken(CancellationToken cancellationToken);
+        Task SetChannel(ChannelReader<int> reader);
     }
 
     public class MockHub : Hub, IMockHub
@@ -81,7 +83,7 @@ namespace SignalR.Strong.Tests.Common
             return Task.FromResult(a);
         }
 
-        public Task<ChannelReader<int>> StreamToClient(List<int> a)
+        public Task<ChannelReader<int>> StreamToClientViaChannel(List<int> a)
         {
             var channel = Channel.CreateUnbounded<int>();
 
@@ -110,7 +112,7 @@ namespace SignalR.Strong.Tests.Common
             return Task.FromResult(channel.Reader);
         }
 
-        public Task<ChannelReader<int>> StreamToClientWithToken(List<int> a, CancellationToken cancellationToken)
+        public Task<ChannelReader<int>> StreamToClientViaChannelWithToken(List<int> a, CancellationToken cancellationToken)
         {
             var channel = Channel.CreateUnbounded<int>();
             
@@ -141,7 +143,7 @@ namespace SignalR.Strong.Tests.Common
             return Task.FromResult(channel.Reader);
         }
 
-        public async Task StreamFromClient(List<int> a, ChannelReader<int> reader)
+        public async Task StreamFromClientViaChannel(List<int> a, ChannelReader<int> reader)
         {
             var channel = Channel.CreateUnbounded<int>();
 
@@ -150,7 +152,32 @@ namespace SignalR.Strong.Tests.Common
             return;
         }
         
-        private ChannelReader<int> _loopInput
+        public async IAsyncEnumerable<int> StreamToClientViaEnumerableWithToken(
+            List<int> a,
+            [EnumeratorCancellation]
+            CancellationToken cancellationToken)
+        {
+            // adapted from https://docs.microsoft.com/en-us/aspnet/core/signalr/streaming?view=aspnetcore-5.0
+            foreach (var i in a)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                yield return i;
+
+                await Task.Yield();
+            }
+        }
+        
+        public async Task StreamFromClientViaEnumerable(List<int> a, IAsyncEnumerable<int> reader)
+        {
+            // adapted from https://docs.microsoft.com/en-us/aspnet/core/signalr/streaming?view=aspnetcore-5.0
+            await foreach (var item in reader)
+            {
+                await Task.Yield();
+            }
+        }
+        
+        /*private ChannelReader<int> _loopInput
         {
             get => (ChannelReader<int>)Context.Items["loopInput"];
             set => Context.Items["loopInput"] = value;
@@ -218,7 +245,7 @@ namespace SignalR.Strong.Tests.Common
             {
                 _loopOutput.Writer.TryComplete(exception);
             }
-        }
+        }*/
 
         public async Task TriggerSyncCallback()
         {
@@ -237,7 +264,7 @@ namespace SignalR.Strong.Tests.Common
             return Task.FromResult(channel.Reader);
         }
 
-        public Task<ChannelReader<int>> GetRxChannelWithToken(CancellationToken cancellationToken)
+        public Task<ChannelReader<int>> GetChannelWithToken(CancellationToken cancellationToken)
         {
             var channel = Channel.CreateUnbounded<int>();
 
@@ -246,7 +273,7 @@ namespace SignalR.Strong.Tests.Common
             return Task.FromResult(channel.Reader);
         }
 
-        public Task GetTxChannel(ChannelReader<int> reader)
+        public Task SetChannel(ChannelReader<int> reader)
         {
             return Task.CompletedTask;
         }

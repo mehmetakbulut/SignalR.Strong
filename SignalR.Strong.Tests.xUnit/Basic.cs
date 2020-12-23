@@ -8,11 +8,11 @@ using Xunit;
 
 namespace SignalR.Strong.Tests.xUnit
 {
-    public class Misc : IClassFixture<ServerFixture>
+    public class Basic : IClassFixture<ServerFixture>
     {
         private ServerFixture fixture;
 
-        public Misc(ServerFixture fixture)
+        public Basic(ServerFixture fixture)
         {
             this.fixture = fixture;
         }
