@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 
 namespace SignalR.Strong
 {
-    public class HubInterceptor : IAsyncInterceptor
+    internal class HubInterceptor : IAsyncInterceptor
     {
         private readonly HubConnection _conn;
 
@@ -37,7 +37,7 @@ namespace SignalR.Strong
         {
             if (hasChannelReaderArgument(invocation.Method))
             {
-                var (args, token) = this.parseInputs(invocation.Arguments);
+                var (args, token) = HubInteractionHelpers.ParseIntoArgsAndToken(invocation.Arguments);
                 await _conn.SendCoreAsync(invocation.Method.Name, args, token);
             }
             else
@@ -64,7 +64,7 @@ namespace SignalR.Strong
             Task<TResult> ret = null;
             if (typeof(TResult).IsConstructedGenericType && typeof(TResult).GetGenericTypeDefinition() == typeof(ChannelReader<>))
             {
-                var (args, token) = this.parseInputs(invocation.Arguments);
+                var (args, token) = HubInteractionHelpers.ParseIntoArgsAndToken(invocation.Arguments);
                 var method = typeof(HubConnectionExtensions).GetMethod("StreamAsChannelCoreAsync")
                     .MakeGenericMethod(typeof(TResult).GenericTypeArguments[0]);
                 ret = (Task<TResult>) method.Invoke(null, new object[] {_conn, invocation.Method.Name, args, token});
@@ -74,37 +74,6 @@ namespace SignalR.Strong
                 ret = _conn.InvokeCoreAsync<TResult>(invocation.Method.Name, invocation.Arguments);
             }
             return await ret;
-        }
-
-        private (object[], CancellationToken) parseInputs(object[] arguments)
-        {
-            var array = new object[arguments.Length];
-            var token = default(CancellationToken);
-            
-            for (var i = 0; i < arguments.Length; i++)
-            {
-                if (arguments[i] is CancellationToken)
-                {
-                    token = (CancellationToken) arguments[i];
-                    array = new object[arguments.Length - 1];
-                }
-            }
-            
-            int j = 0;
-            for (var i = 0; i < arguments.Length; i++)
-            {
-                if (arguments[i] is CancellationToken)
-                {
-                    continue;
-                }
-                else
-                {
-                    array[j] = arguments[i];
-                    j++;
-                }
-            }
-
-            return (array, token);
         }
     }
 }

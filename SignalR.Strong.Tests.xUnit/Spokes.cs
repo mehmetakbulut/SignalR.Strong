@@ -141,5 +141,29 @@ namespace SignalR.Strong.Tests.xUnit
             client.BuildSpokes();
             spoke = (ISpokeInterface) client.GetSpoke(typeof(ISpokeInterface));
         }
+        
+        private class AutoFedSpoke : Spoke<IMockHub>
+        {
+            public override HubConnection Connection { get; set; }
+            public override StrongClient Client { get; set; }
+            public override object WeakHub { get; set; }
+        }
+        
+        [Fact]
+        public async Task AutoFedSpokeHasPropertiesSet()
+        {
+            var client = new StrongClient();
+            client.RegisterHub<IMockHub>(new HubConnectionBuilder().WithUrl("http://localhost/").Build());
+            client.RegisterSpoke<AutoFedSpoke, IMockHub>();
+            client.BuildSpokes();
+            var spoke = client.GetSpoke<AutoFedSpoke>();
+            spoke.Client.Should().BeSameAs(client);
+            var conn = client.GetConnection<IMockHub>();
+            spoke.Connection.Should().BeSameAs(conn);
+            spoke.Connection.Should().BeSameAs(conn);
+            var hub = client.GetHub<IMockHub>();
+            spoke.WeakHub.Should().BeSameAs(hub);
+            spoke.Hub.Should().BeSameAs(hub);
+        }
     }
 }

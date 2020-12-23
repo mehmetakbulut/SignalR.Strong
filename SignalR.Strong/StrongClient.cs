@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
+using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Castle.DynamicProxy;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -10,10 +14,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace SignalR.Strong
 {
-    public class StrongClient
+    public class StrongClient : IStrongClient
     {
         private IServiceProvider _provider;
-        private ProxyGenerator _proxyGenerator = new ProxyGenerator();
+        private ProxyGenerator _proxyGenerator;
         private Dictionary<System.Type, HubConnection> _hubConnections = new Dictionary<Type, HubConnection>();
         private Dictionary<System.Type, object> _hubs = new Dictionary<Type, object>();
         private Dictionary<System.Type, System.Type> _spokeToHubMapping = new Dictionary<Type, Type>();
@@ -21,24 +25,41 @@ namespace SignalR.Strong
         private Dictionary<System.Type, List<IDisposable>> _spokeToHandlerRegistrationsMapping = new Dictionary<Type, List<IDisposable>>();
         private Dictionary<System.Type, object> _spokes = new Dictionary<Type, object>();
 
+        private bool isDynamicCodeGenerationSupported;
+
         public bool IsBuilt { get; private set; }
 
         public StrongClient()
         {
-
+            createProxyGeneratorIfSupported();
         }
 
         public StrongClient(IServiceProvider provider)
         {
             _provider = provider;
+            createProxyGeneratorIfSupported();
         }
 
-        public StrongClient RegisterSpoke<TSpoke, THub>()
+        private void createProxyGeneratorIfSupported()
+        {
+            try
+            {
+                _proxyGenerator = new ProxyGenerator();
+                var _ = _proxyGenerator.CreateInterfaceProxyWithoutTarget(typeof(IStrongClient));
+                isDynamicCodeGenerationSupported = true;
+            }
+            catch
+            {
+                isDynamicCodeGenerationSupported = false;
+            }
+        }
+
+        public IStrongClient RegisterSpoke<TSpoke, THub>()
         {
             return this.RegisterSpoke<TSpoke, TSpoke, THub>();
         }
         
-        public StrongClient RegisterSpoke<TSpokeIntf, TSpokeImpl, THub>()
+        public IStrongClient RegisterSpoke<TSpokeIntf, TSpokeImpl, THub>()
             where TSpokeImpl : TSpokeIntf
         {
             throwIfBuilt(true);
@@ -48,7 +69,7 @@ namespace SignalR.Strong
             return this;
         }
 
-        public StrongClient RegisterSpoke<TSpokeIntf, TSpokeImpl, THub>(TSpokeImpl spoke)
+        public IStrongClient RegisterSpoke<TSpokeIntf, TSpokeImpl, THub>(TSpokeImpl spoke)
             where TSpokeImpl : TSpokeIntf
         {
             this.RegisterSpoke<TSpokeIntf, TSpokeImpl, THub>();
@@ -56,18 +77,30 @@ namespace SignalR.Strong
             return this;
         }
 
-        public StrongClient RegisterHub<THub>(HubConnection hubConnection) where THub : class
+        public IStrongClient RegisterHub<THub>(HubConnection hubConnection) where THub : class
         {
             return this.RegisterHub(typeof(THub), hubConnection);
         }
         
-        public StrongClient RegisterHub(Type hubType, HubConnection hubConnection)
+        public IStrongClient RegisterHub(Type hubType, HubConnection hubConnection)
         {
             throwIfBuilt(true);
-            var hubInterceptor = new HubInterceptor(hubConnection);
-            var hubProxy = _proxyGenerator.CreateInterfaceProxyWithoutTarget(hubType, hubInterceptor.ToInterceptor()); 
             _hubConnections[hubType] = hubConnection;
-            _hubs[hubType] = hubProxy;
+            if (this.isDynamicCodeGenerationSupported)
+            {
+                try
+                {
+                    var hubInterceptor = new HubInterceptor(hubConnection);
+                    var hubProxy =
+                        _proxyGenerator.CreateInterfaceProxyWithoutTarget(hubType, hubInterceptor.ToInterceptor());
+                    _hubs[hubType] = hubProxy;
+                }
+                catch
+                {
+                    _hubConnections.Remove(hubType);
+                    throw;
+                }
+            }
             return this;
         }
 
@@ -79,6 +112,11 @@ namespace SignalR.Strong
         public object GetHub(Type hubType)
         {
             return _hubs[hubType];
+        }
+        
+        public ExpressiveHub<THub> GetExpressiveHub<THub>()
+        {
+            return new ExpressiveHub<THub>(_hubConnections[typeof(THub)]);
         }
 
         public HubConnection GetConnection<THub>()
@@ -108,7 +146,7 @@ namespace SignalR.Strong
             if (IsBuilt == shouldBeBuilt) throw new AccessViolationException("Client must first be built!");
         }
 
-        public async Task<StrongClient> ConnectToHubsAsync()
+        public async Task<IStrongClient> ConnectToHubsAsync()
         {
             await Task.WhenAll(_hubConnections.Values
                 .Where(conn => conn.State == HubConnectionState.Disconnected)
@@ -117,7 +155,7 @@ namespace SignalR.Strong
             return this;
         }
 
-        public StrongClient BuildSpokes()
+        public IStrongClient BuildSpokes()
         {
             IsBuilt = true;
             foreach (var types in _spokeToHubMapping)

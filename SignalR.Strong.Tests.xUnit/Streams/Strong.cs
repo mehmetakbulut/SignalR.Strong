@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -7,25 +8,25 @@ using Microsoft.AspNetCore.SignalR.Client;
 using SignalR.Strong.Tests.Common;
 using Xunit;
 
-namespace SignalR.Strong.Tests.xUnit
+namespace SignalR.Strong.Tests.xUnit.Streams
 {
-    public class ServerToClientStream : IClassFixture<ServerFixture>
+    public class Strong : IClassFixture<ServerFixture>
     {
         private ServerFixture fixture;
-        
-        public ServerToClientStream(ServerFixture fixture)
+
+        public Strong(ServerFixture fixture)
         {
             this.fixture = fixture;
         }
         
         [Fact]
-        public async Task RxWithoutToken()
+        public async Task ClientToServerChannel()
         {
             var client = await fixture.GetClient();
             var hub = client.GetHub<IMockHub>();
 
             var data = new List<int>() {1, 2, 3};
-            var reader = await hub.StreamToClient(data);
+            var reader = await hub.StreamToClientViaChannel(data);
 
             foreach (var item in data)
             {
@@ -36,14 +37,14 @@ namespace SignalR.Strong.Tests.xUnit
         }
         
         [Fact]
-        public async Task RxWithToken()
+        public async Task ClientToServerChannelWithToken()
         {
             var client = await fixture.GetClient();
             var hub = client.GetHub<IMockHub>();
 
             var data = new List<int>() {1, 2, 3};
             var cts = new CancellationTokenSource();
-            var reader = await hub.StreamToClientWithToken(data, cts.Token);
+            var reader = await hub.StreamToClientViaChannelWithToken(data, cts.Token);
 
             await reader.WaitToReadAsync();
             reader.TryRead(out var recv).Should().BeTrue();
@@ -58,6 +59,17 @@ namespace SignalR.Strong.Tests.xUnit
                 delay.Dispose();
                 throw new AssertionFailedException("Token didn't cause channel to get closed within timeout");
             }
+        }
+        
+        [Fact]
+        public async Task ServerToClientChannel()
+        {
+            var client = await fixture.GetClient();
+            var hub = client.GetHub<IMockHub>();
+
+            var data = new List<int>() {1, 2, 3};
+            var channel = Channel.CreateUnbounded<int>();
+            await hub.StreamFromClientViaChannel(data, channel.Reader);
         }
     }
 }
