@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 
 namespace SignalR.Strong
 {
-    public static partial class HubConnectionExtensions
+    public static partial class HubConnectionExtensionsDynamic
     {
         private static ProxyGenerator proxyGenerator = new ProxyGenerator();  
         

@@ -1,14 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>0.2.0-alpha</Version>
-    <Copyright>Mehmet Akbulut</Copyright>
+    <Version>0.2.1-alpha</Version>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Title>SignalR.Strong</Title>
-    <Authors>Mehmet Akbulut</Authors>
-    <PackageProjectUrl>https://github.com/mehmetakbulut/SignalR.Strong</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/mehmetakbulut/SignalR.Strong</RepositoryUrl>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Strongly-typed calls from client to server and handlers for calls from server to client</Description>
 

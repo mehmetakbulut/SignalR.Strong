@@ -1,0 +1,11 @@
+<Project>
+    <PropertyGroup>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Authors>Mehmet Akbulut</Authors>
+        <Owners>Mehmet Akbulut</Owners>
+        <Copyright>Mehmet Akbulut</Copyright>
+        <PackageProjectUrl>https://github.com/mehmetakbulut/SignalR.Strong</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/mehmetakbulut/SignalR.Strong</RepositoryUrl>
+    </PropertyGroup>
+</Project>
