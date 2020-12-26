@@ -20,7 +20,7 @@ namespace SignalR.Strong.SourceGenerator
             
             if (!Debugger.IsAttached)
             {
-                Debugger.Launch();
+                //Debugger.Launch();
             }
             
         }
