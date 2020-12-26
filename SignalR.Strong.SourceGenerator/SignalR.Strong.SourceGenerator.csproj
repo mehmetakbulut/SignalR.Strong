@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SignalR.Strong\SignalR.Strong.csproj" PrivateAssets="all" />
+      <ProjectReference Include="..\SignalR.Strong\SignalR.Strong.csproj" />
     </ItemGroup>
 
     <ItemGroup>
