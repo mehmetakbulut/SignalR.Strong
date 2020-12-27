@@ -7,10 +7,17 @@ namespace SignalR.Strong
     public sealed class SpokeRegistration : IDisposable
     {
         private List<IDisposable> disposables;
+        
+        public object Spoke { get; private set; }
 
-        public SpokeRegistration(List<IDisposable> registrations)
+        public SpokeRegistration(object spoke, List<IDisposable> registrations)
         {
-            this.disposables = disposables;
+            this.Spoke = spoke;
+            this.disposables = disposables ?? new List<IDisposable>();
+            if (this.Spoke is IDisposable disposable)
+            {
+                this.disposables.Add(disposable);
+            }
         }
         
         public void Dispose()

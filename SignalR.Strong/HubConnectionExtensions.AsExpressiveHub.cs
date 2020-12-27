@@ -4,7 +4,7 @@ namespace SignalR.Strong
 {
     public static partial class HubConnectionExtensions
     {
-        public static ExpressiveHub<THub> AsExpressiveProxy<THub>(this HubConnection conn)
+        public static ExpressiveHub<THub> AsExpressiveHub<THub>(this HubConnection conn)
         {
             return new ExpressiveHub<THub>(conn);
         }

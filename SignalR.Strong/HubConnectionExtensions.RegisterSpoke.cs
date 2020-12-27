@@ -10,7 +10,7 @@ namespace SignalR.Strong
 {
     public static partial class HubConnectionExtensions
     {
-        public static IDisposable RegisterSpoke(this HubConnection conn, object spoke, System.Type intfType = null)
+        public static SpokeRegistration RegisterSpoke(this HubConnection conn, object spoke, Type intfType = null)
         {
             var regs = new List<IDisposable>(); 
             
@@ -37,26 +37,26 @@ namespace SignalR.Strong
                 regs.Add(reg);
             }
 
-            return new SpokeRegistration(regs);
+            return new SpokeRegistration(spoke, regs);
         }
         
-        public static IDisposable RegisterSpoke<TSpokeIntf, TSpokeImpl>(this HubConnection conn, TSpokeImpl spoke)
+        public static SpokeRegistration RegisterSpoke<TSpokeIntf, TSpokeImpl>(this HubConnection conn, TSpokeImpl spoke)
             where TSpokeImpl : TSpokeIntf
         {
             return conn.RegisterSpoke(spoke, typeof(TSpokeIntf));
         }
         
-        public static IDisposable RegisterSpoke<TSpoke>(this HubConnection conn, TSpoke spoke)
+        public static SpokeRegistration RegisterSpoke<TSpoke>(this HubConnection conn, TSpoke spoke)
         {
             return conn.RegisterSpoke<TSpoke, TSpoke>(spoke);
         }
 
-        public static IDisposable RegisterSpoke<TSpokeIntf>(this HubConnection conn, object spoke)
+        public static SpokeRegistration RegisterSpoke<TSpokeIntf>(this HubConnection conn, object spoke)
         {
             return conn.RegisterSpoke(spoke, typeof(TSpokeIntf));
         }
 
-        public static IDisposable RegisterSpoke(this HubConnection conn, System.Type intfType, System.Type implType, IServiceProvider provider = null)
+        public static SpokeRegistration RegisterSpoke(this HubConnection conn, System.Type intfType, System.Type implType, IServiceProvider provider = null)
         {
             object spoke;
             if (provider is null)
@@ -71,10 +71,16 @@ namespace SignalR.Strong
 
             return conn.RegisterSpoke(spoke, intfType);
         }
-
-        public static IDisposable RegisterSpoke<TSpokeIntf, TSpokeImpl>(this HubConnection conn, IServiceProvider provider = null)
+        
+        public static SpokeRegistration RegisterSpoke<TSpokeIntf, TSpokeImpl>(this HubConnection conn, IServiceProvider provider = null)
+            where TSpokeImpl : TSpokeIntf
         {
             return conn.RegisterSpoke(typeof(TSpokeIntf), typeof(TSpokeImpl), provider);
+        }
+        
+        public static SpokeRegistration RegisterSpoke<TSpoke>(this HubConnection conn, IServiceProvider provider = null)
+        {
+            return conn.RegisterSpoke<TSpoke, TSpoke>(provider);
         }
     }
 }

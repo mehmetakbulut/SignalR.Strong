@@ -21,8 +21,8 @@ namespace SignalR.Strong.Tests.xUnit.Streams
         [Fact]
         public async Task ClientToServerChannel()
         {
-            var client = await fixture.GetClient();
-            var ehub = client.GetExpressiveHub<IMockHub>();
+            var conn = await fixture.GetHubConnection();
+            var ehub = conn.AsExpressiveHub<IMockHub>();
 
             var data = new List<int>() {1, 2, 3};
             var reader = await ehub.StreamAsChannelAsync(hub => hub.StreamToClientViaChannel(data));
@@ -38,8 +38,8 @@ namespace SignalR.Strong.Tests.xUnit.Streams
         [Fact]
         public async Task ClientToServerChannelWithToken()
         {
-            var client = await fixture.GetClient();
-            var ehub = client.GetExpressiveHub<IMockHub>();
+            var conn = await fixture.GetHubConnection();
+            var ehub = conn.AsExpressiveHub<IMockHub>();
 
             var data = new List<int>() {1, 2, 3};
             var cts = new CancellationTokenSource();
@@ -63,8 +63,8 @@ namespace SignalR.Strong.Tests.xUnit.Streams
         [Fact]
         public async Task ClientToServerEnumerableWithToken()
         {
-            var client = await fixture.GetClient();
-            var ehub = client.GetExpressiveHub<IMockHub>();
+            var conn = await fixture.GetHubConnection();
+            var ehub = conn.AsExpressiveHub<IMockHub>();
 
             var data = new List<int>() {1, 2, 3};
             var cts = new CancellationTokenSource();
@@ -81,8 +81,8 @@ namespace SignalR.Strong.Tests.xUnit.Streams
         [Fact]
         public async Task ServerToClientChannelReader()
         {
-            var client = await fixture.GetClient();
-            var ehub = client.GetExpressiveHub<IMockHub>();
+            var conn = await fixture.GetHubConnection();
+            var ehub = conn.AsExpressiveHub<IMockHub>();
 
             var data = new List<int>() {1, 2, 3};
             var channel = Channel.CreateUnbounded<int>();
@@ -92,8 +92,8 @@ namespace SignalR.Strong.Tests.xUnit.Streams
         [Fact]
         public async Task ServerToClientEnumerable()
         {
-            var client = await fixture.GetClient();
-            var ehub = client.GetExpressiveHub<IMockHub>();
+            var conn = await fixture.GetHubConnection();
+            var ehub = conn.AsExpressiveHub<IMockHub>();
 
             var data = new List<int>() {1, 2, 3};
 

@@ -12,7 +12,6 @@ namespace SignalR.Strong.Tests.Benchmark
     public class Stream
     {
         public ServerFixture fixture;
-        public StrongClient client;
         public IMockHub hub;
         public ExpressiveHub<IMockHub> ehub;
         public HubConnection conn;
@@ -24,10 +23,9 @@ namespace SignalR.Strong.Tests.Benchmark
         public async Task SetupAsync()
         {
             fixture = new ServerFixture();
-            client = await fixture.GetClient();
-            hub = client.GetHub<IMockHub>();
-            ehub = client.GetExpressiveHub<IMockHub>();
-            conn = client.GetConnection<IMockHub>();
+            conn = await fixture.GetHubConnection();
+            hub = conn.AsDynamicHub<IMockHub>();
+            ehub = conn.AsExpressiveHub<IMockHub>();
         }
         
         [Benchmark]

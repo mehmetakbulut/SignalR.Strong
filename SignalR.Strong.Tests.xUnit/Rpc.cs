@@ -22,8 +22,8 @@ namespace SignalR.Strong.Tests.xUnit
         [Fact]
         public async Task Get()
         {
-            var client = await fixture.GetClient();
-            var hub = client.GetHub<IMockHub>();
+            var conn = await fixture.GetHubConnection();
+            var hub = conn.AsDynamicHub<IMockHub>();
             
             await hub.GetVoid();
 
@@ -38,8 +38,8 @@ namespace SignalR.Strong.Tests.xUnit
         [Fact]
         public async Task Set()
         {
-            var client = await fixture.GetClient();
-            var hub = client.GetHub<IMockHub>();
+            var conn = await fixture.GetHubConnection();
+            var hub = conn.AsDynamicHub<IMockHub>();
             
             Assert.Equal(123, await hub.SetValueType(123));
 
@@ -52,8 +52,8 @@ namespace SignalR.Strong.Tests.xUnit
         [Fact]
         public async Task GetViaExpr()
         {
-            var client = await fixture.GetClient();
-            var ehub = client.GetExpressiveHub<IMockHub>();
+            var conn = await fixture.GetHubConnection();
+            var ehub = conn.AsExpressiveHub<IMockHub>();
 
             await ehub.SendAsync(hub => hub.GetVoid());
             await ehub.InvokeAsync(hub => hub.GetVoid());
@@ -69,8 +69,8 @@ namespace SignalR.Strong.Tests.xUnit
         [Fact]
         public async Task SetViaExpr()
         {
-            var client = await fixture.GetClient();
-            var ehub = client.GetExpressiveHub<IMockHub>();
+            var conn = await fixture.GetHubConnection();
+            var ehub = conn.AsExpressiveHub<IMockHub>();
             
             Assert.Equal(123, await ehub.InvokeAsync(hub => hub.SetValueType(123)));
 

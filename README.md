@@ -49,25 +49,25 @@ AMD Ryzen 7 1700, 1 CPU, 16 logical and 8 physical cores
 
 Job=LongRun  IterationCount=100  LaunchCount=3  WarmupCount=15  
 
-|   Type |                            Method |       Mean |     Error |    StdDev |     Median |  Gen 0 | Gen 1 | Gen 2 | Allocated |
-|------- |---------------------------------- |-----------:|----------:|----------:|-----------:|-------:|------:|------:|----------:|
-|    Rpc |                 GetVoid_SendAsync |   3.967 us | 0.0264 us | 0.1361 us |   3.971 us | 0.0153 |     - |     - |    1.3 KB |
-|    Rpc |               GetVoid_InvokeAsync | 101.389 us | 0.4854 us | 2.5082 us | 100.923 us |      - |     - |     - |   3.52 KB |
-|    Rpc |                    GetVoid_Strong | 101.674 us | 0.5258 us | 2.6935 us | 101.162 us |      - |     - |     - |   3.74 KB |
-|    Rpc |             GetVoid_ExprSendAsync |   6.757 us | 0.0552 us | 0.2867 us |   6.716 us | 0.0153 |     - |     - |   2.05 KB |
-|    Rpc |           GetVoid_ExprInvokeAsync | 108.218 us | 0.7766 us | 3.9778 us | 107.266 us |      - |     - |     - |   4.16 KB |
-|    Rpc |          GetValueType_InvokeAsync | 105.519 us | 0.7621 us | 3.9382 us | 105.219 us |      - |     - |     - |   3.88 KB |
-|    Rpc |               GetValueType_Strong | 105.812 us | 0.6124 us | 3.1372 us | 105.148 us |      - |     - |     - |   4.16 KB |
-|    Rpc |                 GetValueType_Expr | 110.480 us | 0.6239 us | 3.1278 us | 110.140 us |      - |     - |     - |   4.52 KB |
-|    Rpc |          SetValueType_InvokeAsync | 110.714 us | 0.8177 us | 4.2400 us | 109.678 us |      - |     - |     - |   4.15 KB |
-|    Rpc |               SetValueType_Strong | 113.168 us | 0.9252 us | 4.7724 us | 112.164 us |      - |     - |     - |   4.41 KB |
-|    Rpc |                 SetValueType_Expr | 214.109 us | 1.3943 us | 7.0915 us | 212.251 us |      - |     - |     - |   8.41 KB |
-| Stream |   GetChannel_StreamAsChannelAsync |  36.887 us | 0.4177 us | 2.1734 us |  36.567 us | 0.1221 |     - |     - |  15.66 KB |
-| Stream |                 GetChannel_Strong |  42.712 us | 0.5021 us | 2.5076 us |  41.729 us | 0.2441 |     - |     - |  16.81 KB |
-| Stream |                   GetChannel_Expr | 294.537 us | 0.9812 us | 4.9729 us | 292.374 us |      - |     - |     - |  21.71 KB |
-| Stream |              SetChannel_SendAsync |  24.552 us | 0.1750 us | 0.8980 us |  24.398 us | 0.0610 |     - |     - |   7.29 KB |
-| Stream |                 SetChannel_Strong |  26.178 us | 0.1168 us | 0.5939 us |  26.193 us | 0.0610 |     - |     - |   7.72 KB |
-| Stream |                   SetChannel_Expr | 220.633 us | 0.3706 us | 1.8984 us | 220.332 us |      - |     - |     - |  12.82 KB |
+|   Type |                          Method |       Mean |     Error |    StdDev |     Median |  Gen 0 | Gen 1 | Gen 2 | Allocated |
+|------- |-------------------------------- |-----------:|----------:|----------:|-----------:|-------:|------:|------:|----------:|
+|    Rpc |               GetVoid_SendAsync |   3.794 us | 0.0159 us | 0.0830 us |   3.793 us | 0.0153 |     - |     - |   1.38 KB |
+|    Rpc |             GetVoid_InvokeAsync |  96.429 us | 0.2275 us | 1.1651 us |  96.444 us |      - |     - |     - |   3.79 KB |
+|    Rpc |                  GetVoid_Strong |  99.873 us | 0.7411 us | 3.8094 us |  98.564 us |      - |     - |     - |   4.02 KB |
+|    Rpc |           GetVoid_ExprSendAsync |   6.384 us | 0.0356 us | 0.1848 us |   6.360 us | 0.0153 |     - |     - |   2.14 KB |
+|    Rpc |         GetVoid_ExprInvokeAsync | 105.746 us | 0.3789 us | 1.9407 us | 105.653 us |      - |     - |     - |   4.44 KB |
+|    Rpc |        GetValueType_InvokeAsync |  98.114 us | 0.1878 us | 0.9752 us |  98.119 us |      - |     - |     - |   4.15 KB |
+|    Rpc |             GetValueType_Strong | 102.316 us | 0.4395 us | 2.2476 us | 102.764 us |      - |     - |     - |   4.44 KB |
+|    Rpc |               GetValueType_Expr | 108.173 us | 0.4034 us | 2.0698 us | 108.173 us |      - |     - |     - |    4.8 KB |
+|    Rpc |        SetValueType_InvokeAsync | 107.273 us | 0.2637 us | 1.3673 us | 107.253 us |      - |     - |     - |   4.42 KB |
+|    Rpc |             SetValueType_Strong | 109.812 us | 0.6058 us | 3.0756 us | 109.170 us |      - |     - |     - |   4.69 KB |
+|    Rpc |               SetValueType_Expr | 210.252 us | 0.7363 us | 3.7382 us | 209.827 us |      - |     - |     - |   8.68 KB |
+| Stream | GetChannel_StreamAsChannelAsync |  34.795 us | 0.3795 us | 1.9164 us |  33.971 us | 0.1831 |     - |     - |  15.83 KB |
+| Stream |               GetChannel_Strong |  41.688 us | 0.3619 us | 1.8210 us |  41.156 us | 0.2441 |     - |     - |  17.06 KB |
+| Stream |                 GetChannel_Expr | 292.978 us | 1.6017 us | 8.2331 us | 289.330 us |      - |     - |     - |  22.02 KB |
+| Stream |            SetChannel_SendAsync |  23.304 us | 0.1247 us | 0.6501 us |  23.333 us | 0.0610 |     - |     - |   7.74 KB |
+| Stream |               SetChannel_Strong |  25.724 us | 0.1312 us | 0.6769 us |  25.680 us | 0.0610 |     - |     - |   8.01 KB |
+| Stream |                 SetChannel_Expr | 218.007 us | 0.2408 us | 1.2354 us | 217.885 us |      - |     - |     - |  13.33 KB |
 ```
 `*_SendAsync`, `*_InvokeAsync` and `*_StreamAsChannelAsync` use standard SignalR `HubConnection` methods.
 
