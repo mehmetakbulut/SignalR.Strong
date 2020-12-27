@@ -50,19 +50,14 @@ namespace SignalR.Strong.Tests.Common
 
     public static class SignalRpcClientExtensions
     {
-        private static StrongClient _client;
         public static async Task<StrongClient> GetClient(this ServerFixture fixture)
         {
-            if (_client is null)
-            {
-                var conn = new HubConnectionBuilder()
-                    .WithUrl(fixture.GetCompleteServerUrl("/mockhub"))
-                    .Build();
-                _client = new StrongClient();
-                (await _client.RegisterHub<IMockHub>(conn).ConnectToHubsAsync()).BuildSpokes();
-            }
-
-            return _client;
+            var conn = new HubConnectionBuilder()
+                .WithUrl(fixture.GetCompleteServerUrl("/mockhub"))
+                .Build();
+            var client = new StrongClient();
+            (await client.RegisterHub<IMockHub>(conn).ConnectToHubsAsync()).BuildSpokes();
+            return client;
         }
     }
 }
