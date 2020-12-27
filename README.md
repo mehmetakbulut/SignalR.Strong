@@ -8,7 +8,7 @@ _**Work in progress, API may change**_
 # SignalR.Strong
 
 [SignalR Core](https://docs.microsoft.com/en-us/aspnet/core/signalr/introduction?view=aspnetcore-3.1) hubs can define strongly-typed hub methods and also perform strongly-typed server-to-client RPC however clients can neither define strongly-typed client methods nor perform strongly-typed client-to-server RPC.
-SignalR.Strong is a .NET Standard 2.0 library which addresses this gap by introducing a higher level client so end-to-end static type-checking and refactoring is made possible.
+SignalR.Strong is a .NET Standard 2.0 library which addresses this gap by introducing higher level extensions so end-to-end static type-checking and refactoring is made possible.
 
 ###### Without SignalR.Strong
 
@@ -26,7 +26,7 @@ var resp = await hub.DoSomethingOnServer(arg1, arg2, arg3);
 
 - Strongly-typed calls from client to server
 - Strongly-typed handlers for server to client calls
-- Support for client-to-server and server-to-client streams using `ChannelReader<T>`
+- Support for client-to-server and server-to-client streams
 - No magic strings
 - Small overhead per call and no additional overhead during streaming
 
@@ -49,55 +49,51 @@ AMD Ryzen 7 1700, 1 CPU, 16 logical and 8 physical cores
 
 Job=LongRun  IterationCount=100  LaunchCount=3  WarmupCount=15  
 
-|   Type |                            Method |       Mean |     Error |    StdDev |     Median |  Gen 0 | Gen 1 | Gen 2 | Allocated |
-|------- |---------------------------------- |-----------:|----------:|----------:|-----------:|-------:|------:|------:|----------:|
-|    Rpc |                 GetVoid_SendAsync |   3.967 us | 0.0264 us | 0.1361 us |   3.971 us | 0.0153 |     - |     - |    1.3 KB |
-|    Rpc |               GetVoid_InvokeAsync | 101.389 us | 0.4854 us | 2.5082 us | 100.923 us |      - |     - |     - |   3.52 KB |
-|    Rpc |                    GetVoid_Strong | 101.674 us | 0.5258 us | 2.6935 us | 101.162 us |      - |     - |     - |   3.74 KB |
-|    Rpc |             GetVoid_ExprSendAsync |   6.757 us | 0.0552 us | 0.2867 us |   6.716 us | 0.0153 |     - |     - |   2.05 KB |
-|    Rpc |           GetVoid_ExprInvokeAsync | 108.218 us | 0.7766 us | 3.9778 us | 107.266 us |      - |     - |     - |   4.16 KB |
-|    Rpc |          GetValueType_InvokeAsync | 105.519 us | 0.7621 us | 3.9382 us | 105.219 us |      - |     - |     - |   3.88 KB |
-|    Rpc |               GetValueType_Strong | 105.812 us | 0.6124 us | 3.1372 us | 105.148 us |      - |     - |     - |   4.16 KB |
-|    Rpc |                 GetValueType_Expr | 110.480 us | 0.6239 us | 3.1278 us | 110.140 us |      - |     - |     - |   4.52 KB |
-|    Rpc |          SetValueType_InvokeAsync | 110.714 us | 0.8177 us | 4.2400 us | 109.678 us |      - |     - |     - |   4.15 KB |
-|    Rpc |               SetValueType_Strong | 113.168 us | 0.9252 us | 4.7724 us | 112.164 us |      - |     - |     - |   4.41 KB |
-|    Rpc |                 SetValueType_Expr | 214.109 us | 1.3943 us | 7.0915 us | 212.251 us |      - |     - |     - |   8.41 KB |
-| Stream |   GetChannel_StreamAsChannelAsync |  36.887 us | 0.4177 us | 2.1734 us |  36.567 us | 0.1221 |     - |     - |  15.66 KB |
-| Stream |                 GetChannel_Strong |  42.712 us | 0.5021 us | 2.5076 us |  41.729 us | 0.2441 |     - |     - |  16.81 KB |
-| Stream |                   GetChannel_Expr | 294.537 us | 0.9812 us | 4.9729 us | 292.374 us |      - |     - |     - |  21.71 KB |
-| Stream |              SetChannel_SendAsync |  24.552 us | 0.1750 us | 0.8980 us |  24.398 us | 0.0610 |     - |     - |   7.29 KB |
-| Stream |                 SetChannel_Strong |  26.178 us | 0.1168 us | 0.5939 us |  26.193 us | 0.0610 |     - |     - |   7.72 KB |
-| Stream |                   SetChannel_Expr | 220.633 us | 0.3706 us | 1.8984 us | 220.332 us |      - |     - |     - |  12.82 KB |
+|   Type |                          Method |       Mean |     Error |    StdDev |     Median |  Gen 0 | Gen 1 | Gen 2 | Allocated |
+|------- |-------------------------------- |-----------:|----------:|----------:|-----------:|-------:|------:|------:|----------:|
+|    Rpc |               GetVoid_SendAsync |   3.794 us | 0.0159 us | 0.0830 us |   3.793 us | 0.0153 |     - |     - |   1.38 KB |
+|    Rpc |             GetVoid_InvokeAsync |  96.429 us | 0.2275 us | 1.1651 us |  96.444 us |      - |     - |     - |   3.79 KB |
+|    Rpc |                  GetVoid_Strong |  99.873 us | 0.7411 us | 3.8094 us |  98.564 us |      - |     - |     - |   4.02 KB |
+|    Rpc |           GetVoid_ExprSendAsync |   6.384 us | 0.0356 us | 0.1848 us |   6.360 us | 0.0153 |     - |     - |   2.14 KB |
+|    Rpc |         GetVoid_ExprInvokeAsync | 105.746 us | 0.3789 us | 1.9407 us | 105.653 us |      - |     - |     - |   4.44 KB |
+|    Rpc |        GetValueType_InvokeAsync |  98.114 us | 0.1878 us | 0.9752 us |  98.119 us |      - |     - |     - |   4.15 KB |
+|    Rpc |             GetValueType_Strong | 102.316 us | 0.4395 us | 2.2476 us | 102.764 us |      - |     - |     - |   4.44 KB |
+|    Rpc |               GetValueType_Expr | 108.173 us | 0.4034 us | 2.0698 us | 108.173 us |      - |     - |     - |    4.8 KB |
+|    Rpc |        SetValueType_InvokeAsync | 107.273 us | 0.2637 us | 1.3673 us | 107.253 us |      - |     - |     - |   4.42 KB |
+|    Rpc |             SetValueType_Strong | 109.812 us | 0.6058 us | 3.0756 us | 109.170 us |      - |     - |     - |   4.69 KB |
+|    Rpc |               SetValueType_Expr | 210.252 us | 0.7363 us | 3.7382 us | 209.827 us |      - |     - |     - |   8.68 KB |
+| Stream | GetChannel_StreamAsChannelAsync |  34.795 us | 0.3795 us | 1.9164 us |  33.971 us | 0.1831 |     - |     - |  15.83 KB |
+| Stream |               GetChannel_Strong |  41.688 us | 0.3619 us | 1.8210 us |  41.156 us | 0.2441 |     - |     - |  17.06 KB |
+| Stream |                 GetChannel_Expr | 292.978 us | 1.6017 us | 8.2331 us | 289.330 us |      - |     - |     - |  22.02 KB |
+| Stream |            SetChannel_SendAsync |  23.304 us | 0.1247 us | 0.6501 us |  23.333 us | 0.0610 |     - |     - |   7.74 KB |
+| Stream |               SetChannel_Strong |  25.724 us | 0.1312 us | 0.6769 us |  25.680 us | 0.0610 |     - |     - |   8.01 KB |
+| Stream |                 SetChannel_Expr | 218.007 us | 0.2408 us | 1.2354 us | 217.885 us |      - |     - |     - |  13.33 KB |
 ```
 `*_SendAsync`, `*_InvokeAsync` and `*_StreamAsChannelAsync` use standard SignalR `HubConnection` methods.
 
-`*_Strong` use methods exposed by `IStrongClient.GetHub<THub>()` while `*_Expr` use methods exposed by `IStrongClient.GetExpressiveHub<THub>()`.
+`*_Strong` use methods exposed by `AsDynamicHub<THub>()` while `*_Expr` use methods exposed by `AsExpressiveHub<THub>()`.
 
 ### Usage
 
 #### Setup
 
-1. Create a client: `var client = new SignalR.Strong.StrongClient()`
-2. Register hubs: `client.RegisterHub<IMyHub>(hubConnection)`
+1. Create `HubConnection` as usual.
+2. Get strongly typed proxy with `conn.AsDynamicHub<THub>()`.
 3. Register spokes which are handlers for server-to-client calls:
 ```c#
-client.RegisterSpoke<MySpoke, IMyHub>();             // Simplest form, type will be MySpoke
-client.RegisterSpoke<IMySpoke, MySpoke, IMyHub>();   // Constrain handler interface, type will be IMySpoke
-client.RegisterSpoke<IMySpoke, IMyHub>(new MyHub()); // Pass instance manually, type will be IMySpoke
+conn.RegisterSpoke<MySpoke>();                  // Simplest form, type will be MySpoke
+conn.RegisterSpoke<IMySpoke, MySpoke>();        // Constrain handler interface, type will be IMySpoke
+conn.RegisterSpoke<IMySpoke>(new MySpoke());    // Pass instance manually, type will be IMySpoke
 ```
-4. Connect hubs that haven't been yet: `await client.ConnectToHubsAsync()`
-5. Build spokes: `client.BuildSpokes()` (only needed if you have registered spokes)
 
 #### Interaction
 
-- `THub IStrongClient.GetHub<THub>()` returns a hub proxy that you can use for performing strongly-typed calls as well as streaming. Not supported on AOT platforms.
+- `THub HubConnection.AsDynamicHub<THub>()` returns a dynamic proxy that you can use for performing strongly-typed calls as well as streaming. Not supported on AOT platforms.
 
-- `ExpressiveHub<THub> IStrongClient.GetExpressiveHub<THub>()` returns an expressive hub that allows you to specify underlying SignalR operation (e.g. `SendAsync` vs `InvokeAsync`).
-  This requires you to feed an expression (e.g. `client.GetExpressiveHub<IMyHub>().InvokeAsync(hub => hub.DoSomethingOnServer(arg1, arg2, arg3))`). Should work on AOT but untested with IL2CPP. 
-
-- `HubConnection IStrongClient.GetHubConnection<THub>()` returns underlying hub connection for performing low-level operations such as registering for events. (e.g. `Reconnecting`)
-
-- `TSpoke IStrongClient.GetSpoke<TSpoke>()` can be used to inspect and edit a spoke though might need to cast it to a concrete type if `TSpoke` is an interface defining only the callback surface.
+- `ExpressiveHub<THub> HubConnection.AsExpressiveHub<THub>()` returns an expressive proxy that allows you to specify underlying SignalR operation (e.g. `SendAsync` vs `InvokeAsync`).
+  This requires you to feed an expression (e.g. `conn.AsExpressiveHub<IMyHub>().InvokeAsync(hub => hub.DoSomethingOnServer(arg1, arg2, arg3))`). Should work on AOT but untested with IL2CPP. 
+  
+- `SpokeRegistration HubConnection.RegisterSpoke<TSpoke>()` registers a server-to-client callback handler and returns registration object which can be used to access the spoke instance. Remember to call `SpokeRegistration.Dispose()` if handler should no longer handle callbacks.
 
 - Overloads of above methods exist for calling non-generically with a `System.Type` instance if needed.
 
@@ -114,13 +110,10 @@ public interface IMyHub
 var conn = new SignalR.Client.HubConnection()
     .WithUrl("http://localhost:53353/MyHub")
     .Build();
+    
+await conn.StartAsync();
 
-var client = new SignalR.Strong.StrongClient();
-await client
-    .RegisterHub<IMyHub>(conn)
-    .ConnectToHubsAsync();
-
-var myHub = client.GetHub<IMyHub>();
+var myHub = conn.AsDynamicHub<IMyHub>();
 var response = await myHub.DoSomethingOnServer(new List<double>() { 0.4, 0.2 });
 ```
 
@@ -150,16 +143,13 @@ var conn = new SignalR.Client.HubConnection()
     .WithUrl("http://localhost:53353/MyHub")
     .Build();
 
-var client = new SignalR.Strong.StrongClient();
-await client
-    .RegisterHub<IMyHub>(conn)
-    .RegisterSpoke<IMySpoke, IMyHub>(new MySpoke())
-    .ConnectToHubsAsync();
-client.BuildSpokes();
+await conn.StartAsync();
+
+var registration = conn.RegisterSpoke<IMySpoke>(new MySpoke())
 
 /* Some time after server calls `DoSomethingOnClient` */
 
-var mySpoke = client.GetSpoke<IMySpoke>();
+var mySpoke = (MySpoke) registration.Spoke;
 Console.WriteLine(mySpoke.HasServerCalled);
 ```
 
@@ -176,13 +166,9 @@ var conn = new SignalR.Client.HubConnection()
     .WithUrl("http://localhost:53353/MyHub")
     .Build();
 
-var client = new SignalR.Strong.StrongClient();
-await client
-    .RegisterHub<IMyHub>(conn)
-    .ConnectToHubsAsync();
-client.Build();
+await conn.StartAsync();
 
-var myHub = client.GetHub<IMyHub>();
+var myHub = conn.AsDynamicHub<IMyHub>();
 
 // Server to Client
 var cts = new CancellationTokenSource();
@@ -210,13 +196,9 @@ var conn = new SignalR.Client.HubConnection()
     .WithUrl("http://localhost:53353/MyHub")
     .Build();
 
-var client = new SignalR.Strong.StrongClient();
-await client
-    .RegisterHub<IMyHub>(conn)
-    .ConnectToHubsAsync();
-client.Build();
+await conn.StartAsync();
 
-var ehub = client.GetExpressiveHub<IMyHub>();
+var ehub = conn.AsExpressiveHub<IMyHub>();
 
 await ehub.SendAsync(hub => hub.DoThisOnServer(arg));
 await ehub.InvokeAsync(hub => hub.DoThisOnServer(arg));
@@ -234,15 +216,15 @@ await ehub.SendAsync(hub => hub.ClientToServerStream(reader));
 
 ### Implementation
 
-`StrongClient` relies on interfaces for hubs and spokes to be defined.
+`SignalR.Strong` relies on interfaces for hubs and spokes to be defined.
 This can be accomplished by a common library so both the server and client use these interfaces in their implementations.
-(e.g. `MyHub : Hub<IMySpoke>, IMyHub` on server and `MySpoke : Spoke<IMySpoke>, IMySpoke` on client)
+(e.g. `MyHub : Hub<IMySpoke>, IMyHub` on server and `MySpoke : IMySpoke` on client)
 
-There are two implementations of hub calls: proxy (`IStrongClient.GetHub<T>()`) and expressive (`IStrongClient.GetExpressiveHub<T>()`).
-Proxy calls are the recommended approach since they offer better performance and simplicity.
+There are two implementations of hub calls: dynamic proxy (`conn.AsDynamicHub<T>()`) and expressive (`conn.AsExpressiveHub<T>()`).
+Dynamic proxy calls are the recommended approach since they offer better performance and simplicity.
 Expressive calls are offered as an alternative for many AOT platforms as well as the ability to run specific `HubConnection` methods while maintaining some type safety.
 
-Proxy hubs provided by [Castle DynamicProxy](https://www.castleproject.org/projects/dynamicproxy/) are leveraged to provide the API surface of the target hub in a strongly-typed manner.
+Dynamic proxies provided by [Castle DynamicProxy](https://www.castleproject.org/projects/dynamicproxy/) are leveraged to provide the API surface of the target hub in a strongly-typed manner.
 This also allows interception of method invocations so the underlying `SignalR.Client.HubConnection` can have its `SendAsync(..)`, `InvokeAsync(..)` and `StreamAsChannelAsync(..)` methods invoked as appropriate with proper transformation.
 Reflection is heavily used though benchmarks show that overhead from reflection pales in comparison to network latency.
 Performance can be further improved by caching interception behavior. Since DynamicProxy uses `Reflection.Emit`, proxy hubs won't work on most AOT platforms.
@@ -255,9 +237,9 @@ On AOT platforms, this might be the only viable option though it is hard to guar
 
 ### Limitations
 
-- Due to use of `Reflection.Emit` in Castle DynamicProxy, `IStrongClient.GetHub<THub>()` isn't supported on AOT platforms. Try `IStrongClient.GetExpressiveHub<THub>()` instead though that may still not work for all cases such as IL2CPP.
+- Due to use of `Reflection.Emit` in Castle DynamicProxy, `conn.AsDynamicHub<THub>()` isn't supported on AOT platforms. Try `conn.AsExpressiveHub<THub>()` instead though that may still not work for all cases such as IL2CPP.
 
-- Streams using `IAsyncEnumerable<T>` are currently unsupported via `IStrongClient.GetHub<THub>()`. Try streams using `ChannelReader<T>` or `IStrongClient.GetExpressiveHub<THub>()` instead.
+- Streams using `IAsyncEnumerable<T>` are currently unsupported via `conn.AsDynamicHub<THub>()`. Try streams using `ChannelReader<T>` or `conn.AsExpressiveHub<THub>()` instead.
 
 - Passing of multiple `CancellationToken`, `ChannelReader<T>` and `IAsyncEnumerable<T>` are undefined behavior.
 

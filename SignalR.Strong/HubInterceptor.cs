@@ -65,7 +65,7 @@ namespace SignalR.Strong
             if (typeof(TResult).IsConstructedGenericType && typeof(TResult).GetGenericTypeDefinition() == typeof(ChannelReader<>))
             {
                 var (args, token) = HubInteractionHelpers.ParseIntoArgsAndToken(invocation.Arguments);
-                var method = typeof(HubConnectionExtensions).GetMethod("StreamAsChannelCoreAsync")
+                var method = typeof(Microsoft.AspNetCore.SignalR.Client.HubConnectionExtensions).GetMethod("StreamAsChannelCoreAsync")
                     .MakeGenericMethod(typeof(TResult).GenericTypeArguments[0]);
                 ret = (Task<TResult>) method.Invoke(null, new object[] {_conn, invocation.Method.Name, args, token});
             }

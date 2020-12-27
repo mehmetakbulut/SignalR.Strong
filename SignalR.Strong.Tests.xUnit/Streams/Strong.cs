@@ -22,8 +22,8 @@ namespace SignalR.Strong.Tests.xUnit.Streams
         [Fact]
         public async Task ClientToServerChannel()
         {
-            var client = await fixture.GetClient();
-            var hub = client.GetHub<IMockHub>();
+            var conn = await fixture.GetHubConnection();
+            var hub = conn.AsDynamicHub<IMockHub>();
 
             var data = new List<int>() {1, 2, 3};
             var reader = await hub.StreamToClientViaChannel(data);
@@ -39,8 +39,8 @@ namespace SignalR.Strong.Tests.xUnit.Streams
         [Fact]
         public async Task ClientToServerChannelWithToken()
         {
-            var client = await fixture.GetClient();
-            var hub = client.GetHub<IMockHub>();
+            var conn = await fixture.GetHubConnection();
+            var hub = conn.AsDynamicHub<IMockHub>();
 
             var data = new List<int>() {1, 2, 3};
             var cts = new CancellationTokenSource();
@@ -64,8 +64,8 @@ namespace SignalR.Strong.Tests.xUnit.Streams
         [Fact]
         public async Task ServerToClientChannel()
         {
-            var client = await fixture.GetClient();
-            var hub = client.GetHub<IMockHub>();
+            var conn = await fixture.GetHubConnection();
+            var hub = conn.AsDynamicHub<IMockHub>();
 
             var data = new List<int>() {1, 2, 3};
             var channel = Channel.CreateUnbounded<int>();

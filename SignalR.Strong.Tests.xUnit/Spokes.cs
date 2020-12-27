@@ -44,22 +44,19 @@ namespace SignalR.Strong.Tests.xUnit
             var conn = new HubConnectionBuilder()
                 .WithUrl(fixture.GetCompleteServerUrl("/mockhub"))
                 .Build();
-            var client = new StrongClient();
-            client.RegisterHub<IMockHub>(conn);
-            client.RegisterSpoke<MockSpoke, IMockHub>();
-            await client.ConnectToHubsAsync();
-            client.BuildSpokes();
+            var registration = conn.RegisterSpoke<MockSpoke>();
+            await conn.StartAsync();
 
-            var spoke = client.GetSpoke<MockSpoke>();
+            var spoke = (MockSpoke) registration.Spoke;
 
             spoke.GotSyncCallback.Should().BeFalse();
             spoke.GotAsyncCallback.Should().BeFalse();
 
-            await client.GetHub<IMockHub>().TriggerSyncCallback();
+            await conn.AsDynamicHub<IMockHub>().TriggerSyncCallback();
             await Task.Delay(1000);
             spoke.GotSyncCallback.Should().BeTrue();
             
-            await client.GetHub<IMockHub>().TriggerAsyncCallback();
+            await conn.AsDynamicHub<IMockHub>().TriggerAsyncCallback();
             await Task.Delay(1000);
             spoke.GotAsyncCallback.Should().BeTrue();
         }
@@ -97,12 +94,9 @@ namespace SignalR.Strong.Tests.xUnit
             var services = new ServiceCollection();
             services.AddSingleton<IDependency, Dependency>();
             var provider = services.BuildServiceProvider();
-            var client = new StrongClient(provider);
-            client.RegisterHub<IMockHub>(conn);
-            client.RegisterSpoke<DependentSpoke, IMockHub>();
-            client.BuildSpokes();
+            var reg = conn.RegisterSpoke<DependentSpoke>(provider);
 
-            var spoke = client.GetSpoke<DependentSpoke>();
+            var spoke = (DependentSpoke) reg.Spoke;
             spoke.Dependency.Should().NotBeNull();
             spoke.Dependency.Should().BeSameAs(provider.GetRequiredService<IDependency>());
         }
@@ -123,47 +117,73 @@ namespace SignalR.Strong.Tests.xUnit
         [Fact]
         public void RegisterAndGetSpoke()
         {
-            var client = new StrongClient();
-            client.RegisterHub<IMockHub>(new HubConnectionBuilder().WithUrl("http://localhost/").Build());
-            client.RegisterSpoke<ISpokeInterface, SpokeImplementation, IMockHub>();
-            client.BuildSpokes();
-            var spoke = client.GetSpoke<ISpokeInterface>();
+            var conn = new HubConnectionBuilder().WithUrl("http://localhost/").Build();
             
-            client = new StrongClient();
-            client.RegisterHub<IMockHub>(new HubConnectionBuilder().WithUrl("http://localhost/").Build());
-            client.RegisterSpoke<SpokeImplementation, IMockHub>();
-            client.BuildSpokes();
-            spoke = client.GetSpoke<SpokeImplementation>();
+            var reg = conn.RegisterSpoke<ISpokeInterface, SpokeImplementation>();
+            var spoke = reg.Spoke;
             
-            client = new StrongClient();
-            client.RegisterHub<IMockHub>(new HubConnectionBuilder().WithUrl("http://localhost/").Build());
-            client.RegisterSpoke<ISpokeInterface, SpokeImplementation, IMockHub>((SpokeImplementation)spoke);
-            client.BuildSpokes();
-            spoke = (ISpokeInterface) client.GetSpoke(typeof(ISpokeInterface));
+            reg = conn.RegisterSpoke<SpokeImplementation>();
+            spoke = reg.Spoke;
+            
+            reg = conn.RegisterSpoke<ISpokeInterface, SpokeImplementation>((SpokeImplementation)spoke);
+            spoke = (ISpokeInterface) reg.Spoke;
         }
         
-        private class AutoFedSpoke : Spoke<IMockHub>
+        private class AutoFedSpoke : ISpoke
         {
-            public override HubConnection Connection { get; set; }
-            public override StrongClient Client { get; set; }
-            public override object WeakHub { get; set; }
+            public HubConnection Connection { get; set; }
         }
         
         [Fact]
-        public async Task AutoFedSpokeHasPropertiesSet()
+        public void AutoFedSpokeHasPropertiesSet()
         {
-            var client = new StrongClient();
-            client.RegisterHub<IMockHub>(new HubConnectionBuilder().WithUrl("http://localhost/").Build());
-            client.RegisterSpoke<AutoFedSpoke, IMockHub>();
-            client.BuildSpokes();
-            var spoke = client.GetSpoke<AutoFedSpoke>();
-            spoke.Client.Should().BeSameAs(client);
-            var conn = client.GetConnection<IMockHub>();
+            var conn = new HubConnectionBuilder().WithUrl("http://localhost/").Build();
+            var reg = conn.RegisterSpoke<AutoFedSpoke>();
+            var spoke = (AutoFedSpoke) reg.Spoke;
             spoke.Connection.Should().BeSameAs(conn);
-            spoke.Connection.Should().BeSameAs(conn);
-            var hub = client.GetHub<IMockHub>();
-            spoke.WeakHub.Should().BeSameAs(hub);
-            spoke.Hub.Should().BeSameAs(hub);
+        }
+
+        public class DisposableSpoke : IDisposable
+        {
+            public bool IsDisposed { get; private set; }
+            
+            public Exception ThrowOnDispose { get; set; }
+
+            public void Dispose()
+            {
+                if (ThrowOnDispose != null)
+                {
+                    throw ThrowOnDispose;
+                }
+                IsDisposed = true;
+            }
+        }
+        
+        [Fact]
+        public void DisposeRegistration()
+        {
+            var conn = new HubConnectionBuilder().WithUrl("http://localhost/").Build();
+            
+            var reg = conn.RegisterSpoke<SpokeImplementation>();
+
+            reg.Dispose();
+
+            reg = conn.RegisterSpoke<DisposableSpoke>();
+            var spoke = (DisposableSpoke) reg.Spoke;
+            
+            reg.Dispose();
+
+            spoke.IsDisposed.Should().BeTrue();
+            
+            reg = conn.RegisterSpoke<DisposableSpoke>();
+            spoke = (DisposableSpoke) reg.Spoke;
+            spoke.ThrowOnDispose = new FormatException();
+
+            var exc = Assert.Throws<AggregateException>(() => reg.Dispose());
+
+            exc.InnerExceptions.Should().HaveCount(1);
+
+            exc.InnerException.Should().BeOfType<FormatException>();
         }
     }
 }
