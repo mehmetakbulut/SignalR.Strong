@@ -192,7 +192,7 @@ namespace SignalR.Strong
                 var ispoke = (ISpoke) spoke;
                 ispoke.Connection = connection;
                 ispoke.Client = this;
-                ispoke.WeakHub = this.GetHub(hubType);
+                this.GetHub(hubType);
             }
 
             var methods = intfType.GetMethods(BindingFlags.Instance | BindingFlags.Public);

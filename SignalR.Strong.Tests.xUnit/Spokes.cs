@@ -142,11 +142,10 @@ namespace SignalR.Strong.Tests.xUnit
             spoke = (ISpokeInterface) client.GetSpoke(typeof(ISpokeInterface));
         }
         
-        private class AutoFedSpoke : Spoke<IMockHub>
+        private class AutoFedSpoke : ISpoke
         {
-            public override HubConnection Connection { get; set; }
-            public override StrongClient Client { get; set; }
-            public override object WeakHub { get; set; }
+            public HubConnection Connection { get; set; }
+            public StrongClient Client { get; set; }
         }
         
         [Fact]
@@ -161,9 +160,6 @@ namespace SignalR.Strong.Tests.xUnit
             var conn = client.GetConnection<IMockHub>();
             spoke.Connection.Should().BeSameAs(conn);
             spoke.Connection.Should().BeSameAs(conn);
-            var hub = client.GetHub<IMockHub>();
-            spoke.WeakHub.Should().BeSameAs(hub);
-            spoke.Hub.Should().BeSameAs(hub);
         }
     }
 }
