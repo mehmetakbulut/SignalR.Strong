@@ -142,5 +142,48 @@ namespace SignalR.Strong.Tests.xUnit
             var spoke = (AutoFedSpoke) reg.Spoke;
             spoke.Connection.Should().BeSameAs(conn);
         }
+
+        public class DisposableSpoke : IDisposable
+        {
+            public bool IsDisposed { get; private set; }
+            
+            public Exception ThrowOnDispose { get; set; }
+
+            public void Dispose()
+            {
+                if (ThrowOnDispose != null)
+                {
+                    throw ThrowOnDispose;
+                }
+                IsDisposed = true;
+            }
+        }
+        
+        [Fact]
+        public void DisposeRegistration()
+        {
+            var conn = new HubConnectionBuilder().WithUrl("http://localhost/").Build();
+            
+            var reg = conn.RegisterSpoke<SpokeImplementation>();
+
+            reg.Dispose();
+
+            reg = conn.RegisterSpoke<DisposableSpoke>();
+            var spoke = (DisposableSpoke) reg.Spoke;
+            
+            reg.Dispose();
+
+            spoke.IsDisposed.Should().BeTrue();
+            
+            reg = conn.RegisterSpoke<DisposableSpoke>();
+            spoke = (DisposableSpoke) reg.Spoke;
+            spoke.ThrowOnDispose = new FormatException();
+
+            var exc = Assert.Throws<AggregateException>(() => reg.Dispose());
+
+            exc.InnerExceptions.Should().HaveCount(1);
+
+            exc.InnerException.Should().BeOfType<FormatException>();
+        }
     }
 }
