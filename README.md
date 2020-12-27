@@ -8,7 +8,7 @@ _**Work in progress, API may change**_
 # SignalR.Strong
 
 [SignalR Core](https://docs.microsoft.com/en-us/aspnet/core/signalr/introduction?view=aspnetcore-3.1) hubs can define strongly-typed hub methods and also perform strongly-typed server-to-client RPC however clients can neither define strongly-typed client methods nor perform strongly-typed client-to-server RPC.
-SignalR.Strong is a .NET Standard 2.0 library which addresses this gap by introducing a higher level client so end-to-end static type-checking and refactoring is made possible.
+SignalR.Strong is a .NET Standard 2.0 library which addresses this gap by introducing higher level extensions so end-to-end static type-checking and refactoring is made possible.
 
 ###### Without SignalR.Strong
 
@@ -26,7 +26,7 @@ var resp = await hub.DoSomethingOnServer(arg1, arg2, arg3);
 
 - Strongly-typed calls from client to server
 - Strongly-typed handlers for server to client calls
-- Support for client-to-server and server-to-client streams using `ChannelReader<T>`
+- Support for client-to-server and server-to-client streams
 - No magic strings
 - Small overhead per call and no additional overhead during streaming
 
@@ -71,33 +71,29 @@ Job=LongRun  IterationCount=100  LaunchCount=3  WarmupCount=15
 ```
 `*_SendAsync`, `*_InvokeAsync` and `*_StreamAsChannelAsync` use standard SignalR `HubConnection` methods.
 
-`*_Strong` use methods exposed by `IStrongClient.GetHub<THub>()` while `*_Expr` use methods exposed by `IStrongClient.GetExpressiveHub<THub>()`.
+`*_Strong` use methods exposed by `AsDynamicHub<THub>()` while `*_Expr` use methods exposed by `AsExpressiveHub<THub>()`.
 
 ### Usage
 
 #### Setup
 
-1. Create a client: `var client = new SignalR.Strong.StrongClient()`
-2. Register hubs: `client.RegisterHub<IMyHub>(hubConnection)`
+1. Create `HubConnection` as usual.
+2. Get strongly typed proxy with `conn.AsDynamicHub<THub>()`.
 3. Register spokes which are handlers for server-to-client calls:
 ```c#
-client.RegisterSpoke<MySpoke, IMyHub>();             // Simplest form, type will be MySpoke
-client.RegisterSpoke<IMySpoke, MySpoke, IMyHub>();   // Constrain handler interface, type will be IMySpoke
-client.RegisterSpoke<IMySpoke, IMyHub>(new MyHub()); // Pass instance manually, type will be IMySpoke
+conn.RegisterSpoke<MySpoke>();                  // Simplest form, type will be MySpoke
+conn.RegisterSpoke<IMySpoke, MySpoke>();        // Constrain handler interface, type will be IMySpoke
+conn.RegisterSpoke<IMySpoke>(new MySpoke());    // Pass instance manually, type will be IMySpoke
 ```
-4. Connect hubs that haven't been yet: `await client.ConnectToHubsAsync()`
-5. Build spokes: `client.BuildSpokes()` (only needed if you have registered spokes)
 
 #### Interaction
 
-- `THub IStrongClient.GetHub<THub>()` returns a hub proxy that you can use for performing strongly-typed calls as well as streaming. Not supported on AOT platforms.
+- `THub HubConnection.AsDynamicHub<THub>()` returns a dynamic proxy that you can use for performing strongly-typed calls as well as streaming. Not supported on AOT platforms.
 
-- `ExpressiveHub<THub> IStrongClient.GetExpressiveHub<THub>()` returns an expressive hub that allows you to specify underlying SignalR operation (e.g. `SendAsync` vs `InvokeAsync`).
-  This requires you to feed an expression (e.g. `client.GetExpressiveHub<IMyHub>().InvokeAsync(hub => hub.DoSomethingOnServer(arg1, arg2, arg3))`). Should work on AOT but untested with IL2CPP. 
-
-- `HubConnection IStrongClient.GetHubConnection<THub>()` returns underlying hub connection for performing low-level operations such as registering for events. (e.g. `Reconnecting`)
-
-- `TSpoke IStrongClient.GetSpoke<TSpoke>()` can be used to inspect and edit a spoke though might need to cast it to a concrete type if `TSpoke` is an interface defining only the callback surface.
+- `ExpressiveHub<THub> HubConnection.AsExpressiveHub<THub>()` returns an expressive proxy that allows you to specify underlying SignalR operation (e.g. `SendAsync` vs `InvokeAsync`).
+  This requires you to feed an expression (e.g. `conn.AsExpressiveHub<IMyHub>().InvokeAsync(hub => hub.DoSomethingOnServer(arg1, arg2, arg3))`). Should work on AOT but untested with IL2CPP. 
+  
+- `SpokeRegistration HubConnection.RegisterSpoke<TSpoke>()` registers a server-to-client callback handler and returns registration object which can be used to access the spoke instance. Remember to call `SpokeRegistration.Dispose()` if handler should no longer handle callbacks.
 
 - Overloads of above methods exist for calling non-generically with a `System.Type` instance if needed.
 
@@ -114,13 +110,10 @@ public interface IMyHub
 var conn = new SignalR.Client.HubConnection()
     .WithUrl("http://localhost:53353/MyHub")
     .Build();
+    
+await conn.StartAsync();
 
-var client = new SignalR.Strong.StrongClient();
-await client
-    .RegisterHub<IMyHub>(conn)
-    .ConnectToHubsAsync();
-
-var myHub = client.GetHub<IMyHub>();
+var myHub = conn.AsDynamicHub<IMyHub>();
 var response = await myHub.DoSomethingOnServer(new List<double>() { 0.4, 0.2 });
 ```
 
@@ -150,16 +143,13 @@ var conn = new SignalR.Client.HubConnection()
     .WithUrl("http://localhost:53353/MyHub")
     .Build();
 
-var client = new SignalR.Strong.StrongClient();
-await client
-    .RegisterHub<IMyHub>(conn)
-    .RegisterSpoke<IMySpoke, IMyHub>(new MySpoke())
-    .ConnectToHubsAsync();
-client.BuildSpokes();
+await conn.StartAsync();
+
+var registration = conn.RegisterSpoke<IMySpoke>(new MySpoke())
 
 /* Some time after server calls `DoSomethingOnClient` */
 
-var mySpoke = client.GetSpoke<IMySpoke>();
+var mySpoke = (MySpoke) registration.Spoke;
 Console.WriteLine(mySpoke.HasServerCalled);
 ```
 
@@ -176,13 +166,9 @@ var conn = new SignalR.Client.HubConnection()
     .WithUrl("http://localhost:53353/MyHub")
     .Build();
 
-var client = new SignalR.Strong.StrongClient();
-await client
-    .RegisterHub<IMyHub>(conn)
-    .ConnectToHubsAsync();
-client.Build();
+await conn.StartAsync();
 
-var myHub = client.GetHub<IMyHub>();
+var myHub = conn.AsDynamicHub<IMyHub>();
 
 // Server to Client
 var cts = new CancellationTokenSource();
@@ -210,13 +196,9 @@ var conn = new SignalR.Client.HubConnection()
     .WithUrl("http://localhost:53353/MyHub")
     .Build();
 
-var client = new SignalR.Strong.StrongClient();
-await client
-    .RegisterHub<IMyHub>(conn)
-    .ConnectToHubsAsync();
-client.Build();
+await conn.StartAsync();
 
-var ehub = client.GetExpressiveHub<IMyHub>();
+var ehub = conn.AsExpressiveHub<IMyHub>();
 
 await ehub.SendAsync(hub => hub.DoThisOnServer(arg));
 await ehub.InvokeAsync(hub => hub.DoThisOnServer(arg));
@@ -234,15 +216,15 @@ await ehub.SendAsync(hub => hub.ClientToServerStream(reader));
 
 ### Implementation
 
-`StrongClient` relies on interfaces for hubs and spokes to be defined.
+`SignalR.Strong` relies on interfaces for hubs and spokes to be defined.
 This can be accomplished by a common library so both the server and client use these interfaces in their implementations.
-(e.g. `MyHub : Hub<IMySpoke>, IMyHub` on server and `MySpoke : Spoke<IMySpoke>, IMySpoke` on client)
+(e.g. `MyHub : Hub<IMySpoke>, IMyHub` on server and `MySpoke : IMySpoke` on client)
 
-There are two implementations of hub calls: proxy (`IStrongClient.GetHub<T>()`) and expressive (`IStrongClient.GetExpressiveHub<T>()`).
-Proxy calls are the recommended approach since they offer better performance and simplicity.
+There are two implementations of hub calls: dynamic proxy (`conn.AsDynamicHub<T>()`) and expressive (`conn.AsExpressiveHub<T>()`).
+Dynamic proxy calls are the recommended approach since they offer better performance and simplicity.
 Expressive calls are offered as an alternative for many AOT platforms as well as the ability to run specific `HubConnection` methods while maintaining some type safety.
 
-Proxy hubs provided by [Castle DynamicProxy](https://www.castleproject.org/projects/dynamicproxy/) are leveraged to provide the API surface of the target hub in a strongly-typed manner.
+Dynamic proxies provided by [Castle DynamicProxy](https://www.castleproject.org/projects/dynamicproxy/) are leveraged to provide the API surface of the target hub in a strongly-typed manner.
 This also allows interception of method invocations so the underlying `SignalR.Client.HubConnection` can have its `SendAsync(..)`, `InvokeAsync(..)` and `StreamAsChannelAsync(..)` methods invoked as appropriate with proper transformation.
 Reflection is heavily used though benchmarks show that overhead from reflection pales in comparison to network latency.
 Performance can be further improved by caching interception behavior. Since DynamicProxy uses `Reflection.Emit`, proxy hubs won't work on most AOT platforms.
@@ -255,9 +237,9 @@ On AOT platforms, this might be the only viable option though it is hard to guar
 
 ### Limitations
 
-- Due to use of `Reflection.Emit` in Castle DynamicProxy, `IStrongClient.GetHub<THub>()` isn't supported on AOT platforms. Try `IStrongClient.GetExpressiveHub<THub>()` instead though that may still not work for all cases such as IL2CPP.
+- Due to use of `Reflection.Emit` in Castle DynamicProxy, `conn.AsDynamicHub<THub>()` isn't supported on AOT platforms. Try `conn.AsExpressiveHub<THub>()` instead though that may still not work for all cases such as IL2CPP.
 
-- Streams using `IAsyncEnumerable<T>` are currently unsupported via `IStrongClient.GetHub<THub>()`. Try streams using `ChannelReader<T>` or `IStrongClient.GetExpressiveHub<THub>()` instead.
+- Streams using `IAsyncEnumerable<T>` are currently unsupported via `conn.AsDynamicHub<THub>()`. Try streams using `ChannelReader<T>` or `conn.AsExpressiveHub<THub>()` instead.
 
 - Passing of multiple `CancellationToken`, `ChannelReader<T>` and `IAsyncEnumerable<T>` are undefined behavior.
 
