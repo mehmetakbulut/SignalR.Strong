@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <PackageReference Include="Castle.Core" Version="4.4.1" />
-    <PackageReference Include="Castle.Core.AsyncInterceptor" Version="1.7.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.1" />
   </ItemGroup>
 
