@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Title>SignalR.Strong.Dynamic</Title>
+        <Description>Strongly-typed hub implementation for SignalR.Strong using dynamic proxies</Description>
+        <Version>0.3.0-alpha</Version>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <DebugSymbols>true</DebugSymbols>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Castle.Core" Version="4.4.1" />
+      <PackageReference Include="Castle.Core.AsyncInterceptor" Version="1.7.0" />
+      <PackageReference Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="5.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\SignalR.Strong\SignalR.Strong.csproj" />
+    </ItemGroup>
+
+</Project>

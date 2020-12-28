@@ -8,7 +8,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR.Client;
 
-namespace SignalR.Strong
+namespace SignalR.Strong.Expressive
 {
     public struct ExpressiveHub<THub>
     {

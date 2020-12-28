@@ -1,5 +1,8 @@
+using System.Runtime.CompilerServices;
 using System.Threading;
 
+[assembly: InternalsVisibleTo("SignalR.Strong.Dynamic")]
+[assembly: InternalsVisibleTo("SignalR.Strong.Expressive")]
 namespace SignalR.Strong
 {
     internal static class HubInteractionHelpers
