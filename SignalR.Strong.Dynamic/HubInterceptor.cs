@@ -7,7 +7,7 @@ using System.Xml.XPath;
 using Castle.DynamicProxy;
 using Microsoft.AspNetCore.SignalR.Client;
 
-namespace SignalR.Strong
+namespace SignalR.Strong.Dynamic
 {
     internal class HubInterceptor : IAsyncInterceptor
     {

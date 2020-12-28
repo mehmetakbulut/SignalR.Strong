@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.SignalR.Client;
+using SignalR.Strong.Expressive;
 
 namespace SignalR.Strong
 {

@@ -7,8 +7,8 @@
         <SuppressDependenciesWhenPacking>false</SuppressDependenciesWhenPacking>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <NoPackageAnalysis>true</NoPackageAnalysis>
-        <Version>0.1.0-alpha</Version>
         <Title>SignalR.Strong.SourceGenerator</Title>
+        <Version>0.3.0-alpha</Version>
     </PropertyGroup>
 
     <ItemGroup>

@@ -2,6 +2,7 @@ using System;
 using System.CodeDom.Compiler;
 using Castle.DynamicProxy;
 using Microsoft.AspNetCore.SignalR.Client;
+using SignalR.Strong.Dynamic;
 
 namespace SignalR.Strong
 {

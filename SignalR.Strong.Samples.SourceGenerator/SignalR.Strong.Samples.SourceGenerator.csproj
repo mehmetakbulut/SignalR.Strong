@@ -16,5 +16,8 @@
         <ProjectReference Include="..\SignalR.Strong.SourceGenerator\SignalR.Strong.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="..\SignalR.Strong\SignalR.Strong.csproj" />
     </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.1" />
+    </ItemGroup>
 
 </Project>

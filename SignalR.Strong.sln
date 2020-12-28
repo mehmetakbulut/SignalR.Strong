@@ -15,6 +15,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalR.Strong.SourceGenera
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalR.Strong.Samples.SourceGenerator", "SignalR.Strong.Samples.SourceGenerator\SignalR.Strong.Samples.SourceGenerator.csproj", "{092FED47-037F-4B54-A0C0-84D2AC2CC1FF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalR.Strong.Dynamic", "SignalR.Strong.Dynamic\SignalR.Strong.Dynamic.csproj", "{22525485-AE08-4048-88CB-6487D6E377C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalR.Strong.Expressive", "SignalR.Strong.Expressive\SignalR.Strong.Expressive.csproj", "{D505747C-0103-4357-87DB-3CC5854BB992}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +49,14 @@ Global
 		{092FED47-037F-4B54-A0C0-84D2AC2CC1FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{092FED47-037F-4B54-A0C0-84D2AC2CC1FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{092FED47-037F-4B54-A0C0-84D2AC2CC1FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22525485-AE08-4048-88CB-6487D6E377C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22525485-AE08-4048-88CB-6487D6E377C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22525485-AE08-4048-88CB-6487D6E377C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22525485-AE08-4048-88CB-6487D6E377C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D505747C-0103-4357-87DB-3CC5854BB992}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D505747C-0103-4357-87DB-3CC5854BB992}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D505747C-0103-4357-87DB-3CC5854BB992}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D505747C-0103-4357-87DB-3CC5854BB992}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
