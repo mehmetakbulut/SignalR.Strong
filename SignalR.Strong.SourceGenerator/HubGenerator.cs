@@ -45,10 +45,10 @@ namespace SignalR.Strong
 namespace SignalR.Strong.SourceGenerated
 {");
 
+            // Collect all the symbols for hub interfaces based on type argument to AsGeneratedHub<T> calls
             var hubSymbols = new Dictionary<string, ITypeSymbol>();
-            
             var syntaxTrees = context.Compilation.SyntaxTrees;
-
+            
             foreach (SyntaxTree tree in syntaxTrees)
             {
                 var nodes = tree.GetRoot().DescendantNodes();
@@ -60,28 +60,19 @@ namespace SignalR.Strong.SourceGenerated
                 {
                     if (invocation.Expression is not MemberAccessExpressionSyntax syntax
                         || syntax.Name is not GenericNameSyntax call) continue;
-
+                    
+                    // TODO: Check if receiver/1st-parameter symbol is HubConnection
+                    
                     if (!call.ToString().StartsWith("AsGeneratedHub") || call.Arity != 1 ||
                         call.TypeArgumentList.Arguments[0] is not IdentifierNameSyntax typeArg) continue;
                     
                     if (model.GetSymbolInfo(typeArg).Symbol is not ITypeSymbol {IsAbstract: true} symbol) continue;
                     
                     hubSymbols[symbol.Name] = symbol;
-                    /*
-                    if (method.IsGenericMethod
-                        && method.Arity == 1
-                        && method.ReceiverType != null
-                        && method.OriginalDefinition.Name.StartsWith("AsGeneratedHub"))
-                    {
-                        var typeArgument = method.TypeArguments[0];
-                        if (!typeArgument.IsAbstract) continue;
-                        hubSymbols[typeArgument.Name] = typeArgument;
-                        
-                    }
-                    */
                 }
             }
-
+            
+            // Generate proxy classes for all the hub interfaces detected previously
             foreach (var hubSymbol in hubSymbols.Values)
             {
                 var typeName = $"Generated{hubSymbol.Name}";
@@ -146,6 +137,7 @@ namespace SignalR.Strong.SourceGenerated
             body.AppendLine(@"
 }");
 
+            // Generate a method that will dispatch AsGeneratedHub<T> calls to appropriate proxy constructors
             body.AppendLine(@"
 namespace SignalR.Strong
 {
