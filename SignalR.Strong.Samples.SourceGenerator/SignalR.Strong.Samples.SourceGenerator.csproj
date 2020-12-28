@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+    </PropertyGroup>
+    
+<!-- Uncomment for actual usage
+    <ItemGroup>
+        <PackageReference Include="SignalR.Strong.SourceGenerator" Version="0.1.0-alpha" />
+    </ItemGroup>
+-->
+
+<!-- Comment out for actual usage -->
+    <ItemGroup>
+        <ProjectReference Include="..\SignalR.Strong.SourceGenerator\SignalR.Strong.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\SignalR.Strong\SignalR.Strong.csproj" />
+    </ItemGroup>
+
+</Project>
