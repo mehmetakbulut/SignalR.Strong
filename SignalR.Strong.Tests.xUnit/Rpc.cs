@@ -5,6 +5,7 @@ using FluentAssertions;
 using FluentAssertions.Collections;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.AspNetCore.SignalR.Client;
+using SignalR.Strong.Samples.Common.Hubs;
 using SignalR.Strong.Tests.Common;
 using Xunit;
 

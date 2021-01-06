@@ -12,6 +12,7 @@
     <ItemGroup>
       <ProjectReference Include="..\SignalR.Strong.Dynamic\SignalR.Strong.Dynamic.csproj" />
       <ProjectReference Include="..\SignalR.Strong.Expressive\SignalR.Strong.Expressive.csproj" />
+      <ProjectReference Include="..\SignalR.Strong.Samples.Common\SignalR.Strong.Samples.Common.csproj" />
       <ProjectReference Include="..\SignalR.Strong\SignalR.Strong.csproj" />
     </ItemGroup>
 

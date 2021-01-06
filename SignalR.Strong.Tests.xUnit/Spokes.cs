@@ -6,6 +6,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using SignalR.Strong.Samples.Common.Hubs;
 using SignalR.Strong.Tests.Common;
 using Xunit;
 

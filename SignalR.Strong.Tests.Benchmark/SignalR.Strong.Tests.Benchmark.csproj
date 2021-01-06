@@ -17,6 +17,7 @@
     <PackageReference Include="System.Text.Encodings.Web" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SignalR.Strong.Samples.Common\SignalR.Strong.Samples.Common.csproj" />
     <ProjectReference Include="..\SignalR.Strong.Tests.Common\SignalR.Strong.Tests.Common.csproj" />
     <ProjectReference Include="..\SignalR.Strong\SignalR.Strong.csproj" />
   </ItemGroup>

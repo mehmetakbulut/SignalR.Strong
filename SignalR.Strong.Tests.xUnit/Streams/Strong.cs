@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.AspNetCore.SignalR.Client;
+using SignalR.Strong.Samples.Common.Hubs;
 using SignalR.Strong.Tests.Common;
 using Xunit;
 
