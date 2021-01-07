@@ -9,7 +9,7 @@
         <NoPackageAnalysis>true</NoPackageAnalysis>
         <Title>SignalR.Strong.SourceGenerator</Title>
         <Description>Strongly-typed hub implementation for SignalR.Strong using source generators</Description>
-        <Version>0.3.0</Version>
+        <Version>0.3.1</Version>
     </PropertyGroup>
 
     <ItemGroup>
