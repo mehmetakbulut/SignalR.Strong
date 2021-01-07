@@ -91,8 +91,6 @@ namespace SignalR.Strong.SourceGenerated
                 
                 foreach (var member in members)
                 {
-                    var source = member.DeclaringSyntaxReferences[0];
-
                     var signature = new StringBuilder($"public {member.ReturnType.ToString()} {member.Name}(");
                     var first = true;
 

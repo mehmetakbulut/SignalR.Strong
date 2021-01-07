@@ -5,6 +5,7 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
 using Microsoft.AspNetCore.SignalR.Client;
 using SignalR.Strong.Expressive;
+using SignalR.Strong.Samples.Common.Hubs;
 using SignalR.Strong.Tests.Common;
 
 namespace SignalR.Strong.Tests.Benchmark

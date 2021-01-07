@@ -4,6 +4,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using SignalR.Strong.Samples.Common.Hubs;
 using SignalR.Strong.Tests.Common;
 using Xunit;
 

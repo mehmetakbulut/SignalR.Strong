@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -13,6 +13,7 @@
 
 <!-- Comment out for actual usage -->
     <ItemGroup>
+        <ProjectReference Include="..\SignalR.Strong.Samples.Common\SignalR.Strong.Samples.Common.csproj" />
         <ProjectReference Include="..\SignalR.Strong.SourceGenerator\SignalR.Strong.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="..\SignalR.Strong\SignalR.Strong.csproj" />
     </ItemGroup>
