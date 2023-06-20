@@ -3,10 +3,11 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+// ReSharper disable PossibleInterfaceMemberAmbiguity
 
 namespace SignalR.Strong.Samples.Common.Hubs
 {
-    public interface IMockHub : IMockBase
+    public interface IMockHub : IMockBase1
     {
         Task<int> GetValueType();
 
