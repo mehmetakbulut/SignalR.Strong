@@ -241,5 +241,15 @@ namespace SignalR.Strong.Tests.Common
         {
             return Task.CompletedTask;
         }
+
+        public Task<string> Hello2(string name)
+        {
+            return Task.FromResult($"[2] Hello, {name}!");
+        }
+
+        public Task<string> Hello1(string name)
+        {
+            return Task.FromResult($"[1] Hello, {name}!");
+        }
     }
 }
