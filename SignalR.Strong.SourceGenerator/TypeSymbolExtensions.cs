@@ -17,6 +17,8 @@ namespace SignalR.Strong.SourceGenerator
 
         public static IEnumerable<IMethodSymbol> GetAllInterfaceMethods(this ITypeSymbol typeSymbol, bool includeTop = false)
         {
+            if (typeSymbol == null) throw new ArgumentNullException(nameof(typeSymbol));
+        
             return typeSymbol
                 .GetAllInterfaces(includeTop)
                 .SelectMany(x => x.GetMembers())
