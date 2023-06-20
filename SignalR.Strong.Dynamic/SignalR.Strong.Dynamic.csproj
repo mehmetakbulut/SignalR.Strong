@@ -5,7 +5,7 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Title>SignalR.Strong.Dynamic</Title>
         <Description>Strongly-typed hub implementation for SignalR.Strong using dynamic proxies</Description>
-        <Version>0.3.0</Version>
+        <Version>0.3.1</Version>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -16,6 +16,7 @@
       <PackageReference Include="Castle.Core" Version="4.4.1" />
       <PackageReference Include="Castle.Core.AsyncInterceptor" Version="1.7.0" />
       <PackageReference Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="5.0.1" />
+      <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0.0" />
     </ItemGroup>
 
     <ItemGroup>
