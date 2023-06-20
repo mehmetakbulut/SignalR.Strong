@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SignalR.Strong.Samples.Common.Hubs
 {
-    public interface IMockHub
+    public interface IMockHub : IMockBase
     {
         Task<int> GetValueType();
 
