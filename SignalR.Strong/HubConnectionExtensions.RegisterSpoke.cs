@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace SignalR.Strong
 {
-    public static partial class HubConnectionExtensionsSpokes
+    public static class HubConnectionExtensionsSpokes
     {
         public static SpokeRegistration RegisterSpoke(this HubConnection conn, object spoke, Type intfType = null)
         {

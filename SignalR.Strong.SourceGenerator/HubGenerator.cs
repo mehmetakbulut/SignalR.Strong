@@ -99,10 +99,10 @@ namespace SignalR.Strong.SourceGenerated
         {{
             this.conn = connection;
         }}");
-                
-                var members = hubSymbol.GetMembers()
+                var members = hubSymbol
+                    .GetAllInterfaceMethods(true)
                     .Where(member => member.Kind == SymbolKind.Method)
-                    .Select(member => (IMethodSymbol) member);
+                    .Select(member => member);
                 
                 foreach (var member in members)
                 {
